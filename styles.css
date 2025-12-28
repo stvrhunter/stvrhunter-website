@@ -1072,6 +1072,12 @@ body {
     .work__row--5 {
         padding-left: 10px;
     }
+    
+    /* Larger text in work section on mobile */
+    .work__title,
+    .work__tags {
+        font-size: var(--text-sm);
+    }
 }
 
 /* --------------------------------------------------------------------------
@@ -1204,7 +1210,7 @@ body {
         --container-padding: var(--space-4);
     }
     
-    /* Fixed navigation on mobile */
+    /* Fixed navigation on mobile - above GIF */
     .header {
         padding: var(--space-4);
         position: absolute;
@@ -1213,7 +1219,7 @@ body {
         width: auto;
         right: auto;
         background-color: transparent;
-        z-index: 20;
+        z-index: 150;
     }
     
     .nav {
@@ -1324,16 +1330,23 @@ body {
 
 /* Small Mobile */
 @media (max-width: 480px) {
+    /* Nav text 2x bigger than skills text */
     .nav__link {
-        font-size: var(--text-sm);
+        font-size: clamp(1.25rem, 5vw, 1.5rem);
     }
     
+    /* Skills and label same size as footer links */
     .skills__text {
-        font-size: var(--text-sm);
+        font-size: var(--text-base);
     }
     
     .label__text {
-        font-size: var(--text-sm);
+        font-size: var(--text-base);
+    }
+    
+    /* Remove hover underline effects on mobile */
+    .nav__link::after {
+        display: none;
     }
     
     /* Blob smaller on small mobile (x1.5 smaller than regular mobile) */
@@ -1654,6 +1667,58 @@ body {
         bottom: calc(var(--space-6) - 50px);;
         width: 250px;
         z-index: auto;
+    }
+}
+
+/* Contact Form - Small Mobile */
+@media (max-width: 480px) {
+    /* Larger text in contact form */
+    .contact__label {
+        font-size: clamp(2rem, 8vw, 2.5rem);
+    }
+    
+    .contact__input {
+        font-size: clamp(2rem, 8vw, 2.5rem);
+    }
+    
+    /* Buttons container - centered horizontally */
+    .contact__buttons {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    /* Both buttons same height */
+    .contact__btn--next,
+    .contact__btn--submit {
+        padding: var(--space-4) var(--space-6);
+        min-height: 56px;
+        max-height: 56px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* NEXT button - full width */
+    .contact__btn--next {
+        width: 100%;
+    }
+    
+    /* Submit button - smaller, stays right */
+    .contact__btn--submit {
+        width: auto;
+        margin-left: auto;
+    }
+    
+    /* Back button stays left */
+    .contact__btn-back {
+        margin-right: auto;
+    }
+    
+    /* Remove hover effects on mobile */
+    .contact__btn:not(:disabled):hover {
+        transform: none;
     }
 }
 
