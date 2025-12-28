@@ -6,6 +6,46 @@
 document.addEventListener('DOMContentLoaded', function() {
     
     // --------------------------------------------------------------------------
+    // Theme Toggle (Dark/Light Mode)
+    // Time-based: Light 7AM-6PM, Dark 6PM-7AM
+    // Toggle works for current session only, resets on page reload
+    // --------------------------------------------------------------------------
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeToggleMobile = document.getElementById('theme-toggle-mobile');
+    
+    // Get theme based on current time (7AM-6PM = light, otherwise dark)
+    function getTimeBasedTheme() {
+        const hour = new Date().getHours();
+        // Light theme: 7:00 (7) to 17:59 (before 18)
+        return (hour >= 7 && hour < 18) ? 'light' : 'dark';
+    }
+    
+    // Apply theme to document
+    function setTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+    }
+    
+    // Toggle theme function (session only)
+    function toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        setTheme(newTheme);
+    }
+    
+    // Initialize theme on page load (always time-based)
+    setTheme(getTimeBasedTheme());
+    
+    // Toggle theme on button click (desktop)
+    if (themeToggle) {
+        themeToggle.addEventListener('click', toggleTheme);
+    }
+    
+    // Toggle theme on button click (mobile)
+    if (themeToggleMobile) {
+        themeToggleMobile.addEventListener('click', toggleTheme);
+    }
+
+    // --------------------------------------------------------------------------
     // Smooth Scroll Navigation
     // --------------------------------------------------------------------------
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {

@@ -25,6 +25,15 @@
             <a href="#about" class="nav__link">02/ABOUT</a>
             <a href="#work" class="nav__link">03/WORK</a>
             <a href="#contact" class="nav__link">04/CONTACT</a>
+            
+            <!-- Theme Toggle -->
+            <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+                <span class="theme-toggle__track"></span>
+                <span class="theme-toggle__thumb">
+                    <img src="assets/sun.svg" alt="Light mode" class="theme-toggle__sun">
+                    <img src="assets/moon.svg" alt="Dark mode" class="theme-toggle__moon">
+                </span>
+            </button>
         </nav>
     </header>
 
@@ -45,6 +54,15 @@
                 <!-- Skills - Left side on desktop, right on mobile -->
                 <div class="hero__skills">
                     <p class="skills__text">Graphic Design // Illustration<br>3D Design // Motion Design<br>Web Design</p>
+                    
+                    <!-- Mobile Theme Toggle (under skills) -->
+                    <button class="theme-toggle theme-toggle--mobile" id="theme-toggle-mobile" aria-label="Toggle dark mode">
+                        <span class="theme-toggle__track"></span>
+                        <span class="theme-toggle__thumb">
+                            <img src="assets/sun.svg" alt="Light mode" class="theme-toggle__sun">
+                            <img src="assets/moon.svg" alt="Dark mode" class="theme-toggle__moon">
+                        </span>
+                    </button>
                 </div>
 
                 <!-- Designer label - Right side -->
@@ -221,72 +239,22 @@
 
         <!-- Footer Section -->
         <footer class="footer">
-            <!-- Top Area: THA + Photo + NKS -->
-            <div class="footer__top">
-                <div class="footer__thanks-left">
-                    <img src="assets/footer_files/THA.svg" alt="THA" class="footer__tha">
-                    <img src="assets/footer_files/Thanks.svg" alt="THANKS" class="footer__thanks-mobile">
-                </div>
-                <div class="footer__thanks-right">
-                    <img src="assets/footer_files/photo1.png" alt="Portrait" class="footer__photo1">
-                    <img src="assets/footer_files/NKS.svg" alt="NKS" class="footer__nks">
-                </div>
-                <p class="footer__visiting">You for visiting</p>
-            </div>
-
-            <!-- Middle Area: Socials + Website Link -->
-            <div class="footer__middle">
-                <div class="footer__socials-email">
-                    <p class="footer__email">stvrhunter@gmail.com</p>
-                    <div class="footer__socials footer__socials--left">
-                        <a href="https://t.me/stvrhunter" target="_blank" class="footer__social-link">
-                            <img src="assets/footer_files/TG.svg" alt="Telegram">
-                        </a>
-                        <a href="https://linkedin.com/in/stvrhunter" target="_blank" class="footer__social-link">
-                            <img src="assets/footer_files/LinkedIn.svg" alt="LinkedIn">
-                        </a>
+            <div class="footer__container">
+                <!-- Left: Social Links + Copyright -->
+                <div class="footer__left">
+                    <div class="footer__links">
+                        <a href="https://t.me/stvrhunter" target="_blank" class="footer__link">tg</a>
+                        <a href="https://linkedin.com/in/stvrhunter" target="_blank" class="footer__link">linkedin</a>
+                        <a href="https://instagram.com/stvrhunter" target="_blank" class="footer__link">inst</a>
+                        <a href="https://x.com/stvrhunter" target="_blank" class="footer__link">x.com</a>
+                        <a href="https://behance.net/stvrhunter" target="_blank" class="footer__link">behance</a>
                     </div>
+                    <span class="footer__year">© 2026</span>
                 </div>
-                <div class="footer__socials footer__socials--right">
-                    <a href="https://instagram.com/stvrhunter" target="_blank" class="footer__social-link">
-                        <img src="assets/footer_files/Inst.svg" alt="Instagram">
-                    </a>
-                    <a href="https://x.com/stvrhunter" target="_blank" class="footer__social-link">
-                        <img src="assets/footer_files/Twitter.svg" alt="X/Twitter">
-                    </a>
-                    <a href="https://behance.net/stvrhunter" target="_blank" class="footer__social-link">
-                        <img src="assets/footer_files/Behance.svg" alt="Behance">
-                    </a>
-                </div>
-                <div class="footer__website">
-                    <span class="footer__click">< click ></span>
-                    <a href="#sup" class="footer__website-link">
-                        <img src="assets/footer_files/Ellipse_footer.svg" alt="" class="footer__ellipse">
-                        <span class="footer__website-text">stvrhunter.com</span>
-                    </a>
-                    <span class="footer__click footer__click--below">< click ></span>
-                </div>
-                <!-- TG and LinkedIn below ellipse on mobile -->
-                <div class="footer__socials footer__socials--bottom">
-                    <a href="https://t.me/stvrhunter" target="_blank" class="footer__social-link">
-                        <img src="assets/footer_files/TG.svg" alt="Telegram">
-                    </a>
-                    <a href="https://linkedin.com/in/stvrhunter" target="_blank" class="footer__social-link">
-                        <img src="assets/footer_files/LinkedIn.svg" alt="LinkedIn">
-                    </a>
-                </div>
-            </div>
-
-            <!-- Bottom Area: END + Photo2 -->
-            <div class="footer__bottom">
-                <div class="footer__bottom-right">
+                
+                <!-- Right: Signature -->
+                <div class="footer__signature-wrap">
                     <img src="assets/footer_files/signature.svg" alt="Signature" class="footer__signature">
-                    <img src="assets/footer_files/photo2.png" alt="Workspace" class="footer__photo2">
-                </div>
-                <div class="footer__end-text">
-                    <span class="footer__this-is">This is the</span>
-                    <img src="assets/footer_files/END.svg" alt="END" class="footer__end">
-                    <span class="footer__of-my">of<br> my<br> website</span>
                 </div>
             </div>
         </footer>
