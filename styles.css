@@ -683,50 +683,62 @@ body {
     background-color: var(--color-placeholder);
     border-radius: 2px;
     transition: background-color var(--transition-slow);
+    overflow: hidden;
 }
 
-/* Different aspect ratios for items */
-.work__item--large .work__image {
+.work__image img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Only apply aspect ratios to empty placeholders */
+.work__image:not(:has(img)) {
+    aspect-ratio: 1 / 1;
+}
+
+/* Aspect ratios only for empty placeholders */
+.work__item--large .work__image:not(:has(img)) {
     aspect-ratio: 1 / 1.15;
 }
 
-.work__item--small .work__image {
+.work__item--small .work__image:not(:has(img)) {
     aspect-ratio: 1.3 / 1;
 }
 
-.work__item--medium .work__image {
+.work__item--medium .work__image:not(:has(img)) {
     aspect-ratio: 1.25 / 1;
 }
 
-.work__item--small-tall .work__image {
+.work__item--small-tall .work__image:not(:has(img)) {
     aspect-ratio: 0.72 / 1;
 }
 
-.work__item--large-center .work__image {
+.work__item--large-center .work__image:not(:has(img)) {
     aspect-ratio: 0.95 / 1;
 }
 
-.work__item--small-square .work__image {
+.work__item--small-square .work__image:not(:has(img)) {
     aspect-ratio: 1.15 / 1;
 }
 
-.work__item--large-left .work__image {
+.work__item--large-left .work__image:not(:has(img)) {
     aspect-ratio: 0.85 / 1;
 }
 
-.work__item--grid-right .work__image {
+.work__item--grid-right .work__image:not(:has(img)) {
     aspect-ratio: 1.6 / 1;
 }
 
-.work__item--tall-left .work__image {
+.work__item--tall-left .work__image:not(:has(img)) {
     aspect-ratio: 0.6 / 1;
 }
 
-.work__item--medium-right .work__image {
+.work__item--medium-right .work__image:not(:has(img)) {
     aspect-ratio: 1.15 / 1;
 }
 
-.work__item--wide .work__image {
+.work__item--wide .work__image:not(:has(img)) {
     aspect-ratio: 2.2 / 1;
 }
 
@@ -893,7 +905,7 @@ body {
         margin-right: 20px;
     }
 
-    .work__row--1 .work__item--large .work__image {
+    .work__row--1 .work__item--large .work__image:not(:has(img)) {
         aspect-ratio: 1.2 / 1;
     }
 
@@ -938,7 +950,7 @@ body {
         margin-right: 10px;
     }
 
-    .work__row--2 .work__item--large-center .work__image {
+    .work__row--2 .work__item--large-center .work__image:not(:has(img)) {
         aspect-ratio: 1.2 / 1;
     }
 
@@ -953,7 +965,7 @@ body {
         margin-left: -8px;
     }
 
-    .work__row--3 .work__item--large-left .work__image {
+    .work__row--3 .work__item--large-left .work__image:not(:has(img)) {
         aspect-ratio: 1 / 1;
     }
 
@@ -962,7 +974,7 @@ body {
         margin-right: -5px;
     }
 
-    .work__row--3 .work__item--grid-right .work__image {
+    .work__row--3 .work__item--grid-right .work__image:not(:has(img)) {
         aspect-ratio: 1.3 / 1;
     }
 
@@ -977,7 +989,7 @@ body {
         margin-left: 20px;
     }
 
-    .work__row--4 .work__item--tall-left .work__image {
+    .work__row--4 .work__item--tall-left .work__image:not(:has(img)) {
         aspect-ratio: 0.75 / 1;
     }
 
@@ -986,7 +998,7 @@ body {
         margin-right: -8px;
     }
 
-    .work__row--4 .work__item--medium-right .work__image {
+    .work__row--4 .work__item--medium-right .work__image:not(:has(img)) {
         aspect-ratio: 1 / 1;
     }
 
@@ -997,7 +1009,7 @@ body {
         padding-right: 0;
     }
 
-    .work__item--wide .work__image {
+    .work__item--wide .work__image:not(:has(img)) {
         aspect-ratio: 1.5 / 1;
     }
 
