@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dion Special Project — STVRHUNTER</title>
+    <meta name="description" content="Special Project for Dion x vc.ru by STVRHUNTER">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    
+    <!-- Lottie Player for .lottie files -->
+    <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <a href="../index.html#work" class="project__back">
+        <span class="project__back-arrow">←</span> back
+    </a>
+
+    <!-- Fixed Lottie Animations -->
+    <div class="lottie-fixed lottie-fixed--left">
+        <dotlottie-player src="dion/Weird Hand.lottie" background="transparent" speed="1" loop autoplay></dotlottie-player>
+    </div>
+    <div class="lottie-fixed lottie-fixed--right">
+        <dotlottie-player src="dion/Dead Fish.lottie" background="transparent" speed="1" loop autoplay></dotlottie-player>
+    </div>
+
+    <main class="project-page">
+        <div class="project__container">
+            <div class="project__info">
+                <h1 class="project__title">SPECIAL PROJECT</h1>
+                <p class="project__client">Dion x vc.ru</p>
+                <p class="project__description">This was one of the first major advertising campaigns for Dion targeting a large audience. They partnered with vc.ru, an online media platform with over 20 million monthly users. The project was created to advertise an online video calling service, exploring the lives of people behind their laptop cameras—a theme that resonated strongly during the early days of COVID.</p>
+                <div class="project__tags">
+                    <span class="project__tag">illustration</span>
+                    <span class="project__tag">special project</span>
+                </div>
+            </div>
+            <div class="project__media">
+                <div class="project__image">
+                    <img src="../assets/projects/dion.png" alt="Dion Special Project Hero">
+                </div>
+            </div>
+        </div>
+
+        <!-- Extended Content -->
+        <div class="project__content">
+            <!-- Fullscreen 1 - Before Goal -->
+            <div class="project__fullscreen">
+                <img src="dion/fullscreen1.png" alt="Dion Project Fullscreen View">
+            </div>
+
+            <!-- Goal Section -->
+            <section class="project__section">
+                <h2 class="project__section-title">Goal</h2>
+                <p class="project__section-text">The creative team developed a brilliant concept: showcasing the funny behaviors of users during online conferences. The challenge was to create a visual style that would stop users mid-scroll while staying true to the producers' vision. The client requested a bright, attention-grabbing project with surreal elements.</p>
+                <p class="project__section-text">I decided to build the entire project as one large illustration with interface elements embedded directly into the artwork. This approach creates an unusual user experience and deeper engagement.</p>
+            </section>
+
+            <!-- Shots - Chaotic Layout -->
+            <div class="project__shots">
+                <div class="project__shot project__shot--1">
+                    <img src="dion/shot1.png" alt="Dion Shot 1">
+                </div>
+                <div class="project__shot project__shot--2">
+                    <img src="dion/shot2.png" alt="Dion Shot 2">
+                </div>
+            </div>
+
+            <!-- Process Section with Flying Bee -->
+            <section class="project__section project__section--process">
+                <div class="lottie-bee" id="lottie-bee">
+                    <dotlottie-player src="dion/A bee.lottie" background="transparent" speed="1" loop autoplay></dotlottie-player>
+                </div>
+                <h2 class="project__section-title">Process</h2>
+                <p class="project__section-text">All illustrations were hand-drawn as sketches in Procreate, then converted to vector format and optimized for the web. The project is filled with Lottie animations that respond to user clicks, making every screen feel truly alive.</p>
+            </section>
+
+            <!-- Handdrawn Image with Cat & Eyes Lottie -->
+            <div class="project__handdrawn-wrap">
+                <div class="lottie-inline lottie-inline--cat">
+                    <dotlottie-player src="dion/Sleeping Cat.lottie" background="transparent" speed="1" loop autoplay></dotlottie-player>
+                </div>
+                <div class="project__fullscreen">
+                    <img src="dion/handdrawn.png" alt="Dion Hand-drawn Illustrations">
+                </div>
+                <div class="lottie-inline lottie-inline--eyes">
+                    <dotlottie-player src="dion/Sleepy Eyes.lottie" background="transparent" speed="1" loop autoplay></dotlottie-player>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <section class="project__section">
+                <h2 class="project__section-title">Results</h2>
+                <p class="project__section-text">The project exceeded analyst expectations for conversions to the client's website and received overwhelmingly positive feedback from vc.ru users.</p>
+            </section>
+
+            <!-- Fullscreen 2 - After Results -->
+            <div class="project__fullscreen">
+                <img src="dion/fullscreen2.png" alt="Dion Project Final View">
+            </div>
+
+            <!-- External Link -->
+            <a href="https://vc.ru/special/calls/" target="_blank" rel="noopener noreferrer" class="project__external-link">
+                View live project on vc.ru
+                <span class="project__external-arrow">↗</span>
+            </a>
+        </div>
+    </main>
+
+    <script src="../script.js"></script>
+    <script>
+        // Bee flying animation with random path
+        const bee = document.getElementById('lottie-bee');
+        if (bee) {
+            let angle = 0;
+            let radius = 50;
+            let centerX = 0;
+            let centerY = 0;
+            
+            function animateBee() {
+                angle += 0.02;
+                radius = 30 + Math.sin(angle * 0.5) * 20;
+                const x = Math.cos(angle) * radius + Math.sin(angle * 0.7) * 15;
+                const y = Math.sin(angle * 1.3) * radius * 0.5;
+                bee.style.transform = `translate(${x}px, ${y}px)`;
+                requestAnimationFrame(animateBee);
+            }
+            animateBee();
+        }
+    </script>
+</body>
+</html>
