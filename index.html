@@ -9,32 +9,26 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     
     <!-- Lottie Web Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
     
     <!-- Styles -->
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=upd2026">
 </head>
 <body>
     <!-- Fixed Navigation -->
     <header class="header">
-        <nav class="nav">
-            <a href="#sup" class="nav__link">01/SUP</a>
-            <a href="#about" class="nav__link">02/ABOUT</a>
-            <a href="#work" class="nav__link">03/WORK</a>
-            <a href="#contact" class="nav__link">04/CONTACT</a>
-            
-            <!-- Theme Toggle -->
-            <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
-                <span class="theme-toggle__track"></span>
-                <span class="theme-toggle__thumb">
-                    <img src="assets/sun.svg" alt="Light mode" class="theme-toggle__sun">
-                    <img src="assets/moon.svg" alt="Dark mode" class="theme-toggle__moon">
-                </span>
-            </button>
-        </nav>
+        <div class="header__bar">
+            <a href="#sup" class="header__brand">ARTIOM<br>ZVEREV<sup>®</sup></a>
+            <nav class="nav">
+                <a href="#sup" class="nav__link">01/SUP</a>
+                <a href="#about" class="nav__link">02/ABOUT</a>
+                <a href="#work" class="nav__link">03/WORK</a>
+                <a href="#contact" class="nav__link">04/CONTACT</a>
+            </nav>
+        </div>
     </header>
 
     <!-- Hero Section -->
@@ -50,31 +44,6 @@
                 <img src="assets/GIF_face.gif" alt="STVRHUNTER Portrait" class="portrait__image">
             </div>
 
-            <div class="hero__grid">
-                <!-- Skills - Left side on desktop, right on mobile -->
-                <div class="hero__skills">
-                    <p class="skills__text">Graphic Design // Illustration<br>3D Design // Motion Design<br>Web Design</p>
-                    
-                    <!-- Mobile Theme Toggle (under skills) -->
-                    <button class="theme-toggle theme-toggle--mobile" id="theme-toggle-mobile" aria-label="Toggle dark mode">
-                        <span class="theme-toggle__track"></span>
-                        <span class="theme-toggle__thumb">
-                            <img src="assets/sun.svg" alt="Light mode" class="theme-toggle__sun">
-                            <img src="assets/moon.svg" alt="Dark mode" class="theme-toggle__moon">
-                        </span>
-                    </button>
-                </div>
-
-                <!-- Designer label - Right side -->
-                <div class="hero__label">
-                    <p class="label__text">( Multidisciplinary<br>Designer )</p>
-                </div>
-            </div>
-
-            <!-- Brand name at bottom -->
-            <div class="hero__brand">
-                <img src="assets/STVRHUNTER.svg" alt="STVRHUNTER" class="brand__name">
-            </div>
         </section>
 
         <!-- About Section -->
@@ -264,6 +233,6 @@
     </main>
 
     <!-- Main JavaScript -->
-    <script src="script.js"></script>
+    <script src="script.js?v=upd2026"></script>
 </body>
 </html>
