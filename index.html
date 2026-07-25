@@ -13,35 +13,81 @@
     
     <!-- Lottie Web Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
-    
+
+    <!-- GSAP (core + ScrollTrigger) — global `gsap` / `ScrollTrigger` -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js"></script>
+
+    <!-- Three.js import map (must precede any `type="module"` script) -->
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"
+      }
+    }
+    </script>
+
     <!-- Styles -->
-    <link rel="stylesheet" href="styles.css?v=upd2026">
+    <link rel="stylesheet" href="styles.css?v=showreel-15">
 </head>
 <body>
     <!-- Fixed Navigation -->
     <header class="header">
         <div class="header__bar">
-            <a href="#sup" class="header__brand">ARTIOM<br>ZVEREV<sup>®</sup></a>
+            <a href="#sup" class="header__brand">ARTIOM<br>ZVEREV</a>
             <nav class="nav">
                 <a href="#sup" class="nav__link">01/SUP</a>
                 <a href="#about" class="nav__link">02/ABOUT</a>
                 <a href="#work" class="nav__link">03/WORK</a>
                 <a href="#contact" class="nav__link">04/CONTACT</a>
             </nav>
+            <button class="burger" id="burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+                <span class="burger__line"></span>
+                <span class="burger__line"></span>
+            </button>
         </div>
     </header>
+
+    <!-- Mobile Menu -->
+    <nav class="menu" id="mobile-menu" aria-hidden="true">
+        <ul class="menu__list">
+            <li><a href="#sup" class="menu__link">01/SUP</a></li>
+            <li><a href="#about" class="menu__link">02/ABOUT</a></li>
+            <li><a href="#work" class="menu__link">03/WORK</a></li>
+            <li><a href="#contact" class="menu__link">04/CONTACT</a></li>
+        </ul>
+    </nav>
 
     <!-- Hero Section -->
     <main>
         <section id="sup" class="hero">
+            <!-- Interactive animated clouds background (Vanta.js) -->
+            <div class="hero__bg"></div>
+
             <!-- Lottie blob animation - behind everything -->
             <div class="hero__blob">
                 <div id="lottie-blob"></div>
             </div>
             
-            <!-- Portrait GIF - above everything -->
+            <!-- Portrait 3D model - above everything -->
             <div class="hero__portrait">
-                <img src="assets/GIF_face.gif" alt="STVRHUNTER Portrait" class="portrait__image">
+                <div id="hero-3d" class="portrait__canvas" role="img" aria-label="STVRHUNTER 3D portrait"></div>
+            </div>
+
+            <!-- pxpush-style monospace intro, bottom-right corner -->
+            <div class="hero__intro monospace">
+                <p class="hero__intro-body">art direction, design <br> and lowkey vibecoding</p>
+            </div>
+
+            <!-- Showreel — docked video anchored in the hero; click to expand -->
+            <span class="hero__reel-label monospace">scroll down for more</span>
+
+            <div class="hero__reel">
+                <button class="showreel" id="showreel" type="button" aria-label="Open showreel">
+                    <video class="showreel__video" autoplay muted loop playsinline
+                           src="assets/new_showreel.mp4"></video>
+                </button>
             </div>
 
         </section>
@@ -50,112 +96,24 @@
         <section id="about" class="about">
             <div class="about__content">
                 <p class="about__text">
-                    Hi!<img src="assets/portrait_lowpoly.png" alt="Portrait" class="about__portrait">I'm Artiom Zverev (stvrhunter) — a multidisciplinary designer with over 5 years experience<img src="assets/cat_vibing.gif" alt="Cat vibing" class="about__cat">in different design fields. My goal is to create <span class="about__pill">digital experience<img src="assets/star.svg" alt="Star" class="about__star"></span> for brands<img src="assets/wavy_line.svg" alt="" class="about__wave">and people.
+                    Hi!<img src="assets/portrait_lowpoly.png" alt="Portrait" class="about__portrait">I'm Artiom Zverev — a multidisciplinary designer with over 5 years of experience<img src="assets/cat_vibing.gif" alt="Cat vibing" class="about__cat">in different design fields. My goal is to create digital experiences for brands<span class="about__nowrap"><img src="assets/wavy_line.svg" alt="" class="about__wave">and</span> people.
                 </p>
             </div>
         </section>
 
         <!-- Work Section -->
         <section id="work" class="work">
-            <div class="work__container">
-                <!-- Row 1 -->
-                <div class="work__row work__row--1">
-<article class="work__item work__item--large">
-                        <a href="projects/posters.html" class="work__link">
-                            <div class="work__image">
-                                <img src="assets/projects/posters.png" alt="Inhouse posters">
-                            </div>
-                            <div class="work__meta">
-                                <span class="work__title">Inhouse posters</span>
-                                <span class="work__client">vc.ru</span>
-                            </div>
-                        </a>
-                    </article>
-<article class="work__item work__item--small">
-                        <a href="projects/dion.html" class="work__link">
-                            <div class="work__image">
-                                <img src="assets/projects/dion.png" alt="Special Project">
-                            </div>
-                            <div class="work__meta">
-                                <span class="work__title">Special Project</span>
-                                <span class="work__client">Dion x vc.ru</span>
-                            </div>
-                        </a>
-                    </article>
-<article class="work__item work__item--medium">
-                        <a href="projects/tochka.html" class="work__link">
-                            <div class="work__image">
-                                <img src="assets/projects/tochka.png" alt="Special Project">
-                            </div>
-                            <div class="work__meta">
-                                <span class="work__title">Special Project</span>
-                                <span class="work__client">Tochka x vc.ru</span>
-                            </div>
-                        </a>
-                    </article>
+            <div class="work__panel">
+                <div class="work__text">
+                    <h2 class="work__heading">Currently building brand and product in Repika</h2>
+                    <p class="work__desc">maintaining and enhancing replika's brand identity, building new features and shaping its overall look and feel.</p>
+                    <a href="projects/replika.html" class="work__more">
+                        Read more<span class="work__more-arrow" aria-hidden="true">&#8629;</span>
+                    </a>
                 </div>
 
-                <!-- Row 2 -->
-                <div class="work__row work__row--2">
-<article class="work__item work__item--small-tall">
-                        <a href="projects/alfa.html" class="work__link">
-                            <div class="work__image">
-                                <img src="assets/projects/alfa.png" alt="3d icons">
-                            </div>
-                            <div class="work__meta">
-                                <span class="work__title">3d icons</span>
-                                <span class="work__client">Alfa Bank</span>
-                            </div>
-                        </a>
-                    </article>
-<article class="work__item work__item--large-center">
-                        <a href="projects/bas.html" class="work__link">
-                            <div class="work__image">
-                                <img src="assets/projects/BAS.jpg" alt="3d // motion branding">
-                            </div>
-                            <div class="work__meta">
-                                <span class="work__title">3d // motion branding</span>
-                                <span class="work__client">BAS</span>
-                            </div>
-                        </a>
-                    </article>
-<article class="work__item work__item--small-square">
-                        <a href="projects/product.html" class="work__link">
-                            <div class="work__image">
-                                <img src="assets/projects/product.png" alt="Product renders">
-                            </div>
-                            <div class="work__meta">
-                                <span class="work__title">Product renders</span>
-                                <span class="work__client">SD Agency</span>
-                            </div>
-                        </a>
-                    </article>
-                </div>
-
-                <!-- Row 3 -->
-                <div class="work__row work__row--3">
-<article class="work__item work__item--large-left">
-                        <a href="projects/furniture.html" class="work__link">
-                            <div class="work__image">
-                                <img src="assets/projects/furniture.png" alt="Creative renders and visualisation">
-                            </div>
-                            <div class="work__meta">
-                                <span class="work__title">Creative renders and visualisation</span>
-                                <span class="work__client">SD Agency</span>
-                            </div>
-                        </a>
-                    </article>
-<article class="work__item work__item--grid-right">
-                        <a href="projects/3d_icons.html" class="work__link">
-                            <div class="work__image">
-                                <img src="assets/projects/3d_icons.png" alt="3d illustrations">
-                            </div>
-                            <div class="work__meta">
-                                <span class="work__title">3d illustrations</span>
-                                <span class="work__client">SD Agency</span>
-                            </div>
-                        </a>
-                    </article>
+                <div class="work__media">
+                    <video class="work__video" autoplay muted loop playsinline src="assets/compilation.mp4"></video>
                 </div>
             </div>
         </section>
@@ -215,24 +173,39 @@
                 <!-- Left: Social Links + Copyright -->
                 <div class="footer__left">
                     <div class="footer__links">
-                        <a href="https://t.me/stvrhunter" target="_blank" class="footer__link">tg</a>
-                        <a href="https://linkedin.com/in/stvrhunter" target="_blank" class="footer__link">linkedin</a>
-                        <a href="https://instagram.com/stvrhunter" target="_blank" class="footer__link">inst</a>
-                        <a href="https://x.com/stvrhunter" target="_blank" class="footer__link">x.com</a>
-                        <a href="https://behance.net/stvrhunter" target="_blank" class="footer__link">behance</a>
+                        <a href="https://t.me/stvrhunter" target="_blank" rel="noopener" class="footer__link">tg</a>
+                        <a href="https://linkedin.com/in/stvrhunter" target="_blank" rel="noopener" class="footer__link">linkedin</a>
+                        <a href="https://instagram.com/stvrhunter" target="_blank" rel="noopener" class="footer__link">inst</a>
+                        <a href="https://x.com/stvrhunter" target="_blank" rel="noopener" class="footer__link">x.com</a>
+                        <a href="https://behance.net/stvrhunter" target="_blank" rel="noopener" class="footer__link">behance</a>
                     </div>
                     <span class="footer__year">© 2026</span>
                 </div>
                 
                 <!-- Right: Signature -->
                 <div class="footer__signature-wrap">
-                    <img src="assets/signature.svg" alt="Signature" class="footer__signature">
+                    <img src="assets/sign.png" alt="Signature" class="footer__signature">
                 </div>
             </div>
         </footer>
     </main>
 
+    <!-- Showreel fullscreen overlay (in-page; closes on click anywhere) -->
+    <div class="showreel-fs" id="showreel-fs" aria-hidden="true">
+        <video class="showreel-fs__video" muted loop playsinline src="assets/new_showreel.mp4"></video>
+        <span class="showreel-fs__hint" aria-hidden="true">Click anywhere to close</span>
+    </div>
+
     <!-- Main JavaScript -->
-    <script src="script.js?v=upd2026"></script>
+    <script src="script.js?v=showreel-fs-2"></script>
+
+    <!-- GSAP animations (classic; relies on global gsap/ScrollTrigger above) -->
+    <script src="js/animations.js?v=3"></script>
+
+    <!-- Three.js scene (ES module; resolves `three` via the import map above) -->
+    <script type="module" src="js/three-scene.js?v=22-size"></script>
+
+    <!-- Fly-through clouds background (ES module; resolves `three` via the import map) -->
+    <script type="module" src="js/clouds.js?v=2"></script>
 </body>
 </html>

@@ -6,6 +6,109 @@
 document.addEventListener('DOMContentLoaded', function() {
     
     // --------------------------------------------------------------------------
+    // Header color on scroll
+    // --------------------------------------------------------------------------
+    const header = document.querySelector('.header');
+    if (header) {
+        const onScroll = () => header.classList.toggle('header--scrolled', window.scrollY > 10);
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+    }
+
+    // --------------------------------------------------------------------------
+    // Showreel — click the docked video to expand it into an in-page overlay.
+    // Click anywhere (or Esc) to shrink it back. A tip follows the cursor.
+    // --------------------------------------------------------------------------
+    const showreel = document.querySelector('.showreel');
+    const dockedVideo = document.querySelector('.showreel__video');
+    const fs = document.getElementById('showreel-fs');
+    const fsVideo = fs && fs.querySelector('.showreel-fs__video');
+    const fsHint = fs && fs.querySelector('.showreel-fs__hint');
+
+    if (showreel && fs && fsVideo) {
+        const openShowreel = () => {
+            // Start the big video where the small one is, so it feels continuous.
+            try { fsVideo.currentTime = dockedVideo ? dockedVideo.currentTime : 0; } catch (e) {}
+            fsVideo.play().catch(() => {});
+            fs.classList.add('is-open');
+            fs.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden'; // lock scroll while open
+        };
+
+        const closeShowreel = () => {
+            fs.classList.remove('is-open');
+            fs.setAttribute('aria-hidden', 'true');
+            fsVideo.pause();
+            document.body.style.overflow = '';
+        };
+
+        showreel.addEventListener('click', openShowreel);
+        fs.addEventListener('click', closeShowreel);   // click anywhere closes
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && fs.classList.contains('is-open')) closeShowreel();
+        });
+
+        // Make the "click anywhere to close" tip trail the cursor.
+        if (fsHint) {
+            fs.addEventListener('mousemove', (e) => {
+                fsHint.style.left = e.clientX + 'px';
+                fsHint.style.top = e.clientY + 'px';
+            });
+        }
+    }
+
+    // --------------------------------------------------------------------------
+    // Hero Grid Cursor Focus
+    // --------------------------------------------------------------------------
+    const heroGrid = document.querySelector('.hero__grid');
+    if (heroGrid) {
+        let gridFrame = null;
+        let pointerEvent = null;
+
+        const setGridActive = (active) => {
+            heroGrid.style.setProperty('--grid-hover-opacity', active ? '1' : '0');
+        };
+
+        const updateGridFocus = () => {
+            if (!pointerEvent) return;
+
+            const rect = heroGrid.getBoundingClientRect();
+            const insideGrid =
+                pointerEvent.clientX >= rect.left &&
+                pointerEvent.clientX <= rect.right &&
+                pointerEvent.clientY >= rect.top &&
+                pointerEvent.clientY <= rect.bottom;
+
+            if (!insideGrid) {
+                setGridActive(false);
+                gridFrame = null;
+                return;
+            }
+
+            const x = ((pointerEvent.clientX - rect.left) / rect.width) * 100;
+            const y = ((pointerEvent.clientY - rect.top) / rect.height) * 100;
+
+            heroGrid.style.setProperty('--grid-x', `${x}%`);
+            heroGrid.style.setProperty('--grid-y', `${y}%`);
+            setGridActive(true);
+            gridFrame = null;
+        };
+
+        document.addEventListener('pointermove', (event) => {
+            pointerEvent = event;
+
+            if (!gridFrame) {
+                gridFrame = requestAnimationFrame(updateGridFocus);
+            }
+        }, { passive: true });
+
+        document.addEventListener('pointerleave', () => {
+            setGridActive(false);
+            pointerEvent = null;
+        });
+    }
+
+    // --------------------------------------------------------------------------
     // Smooth Scroll Navigation
     // --------------------------------------------------------------------------
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -36,14 +139,36 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // --------------------------------------------------------------------------
-    // Star Rotation on Hover (rotates 180° each time, stays rotated)
+    // Mobile Menu (burger)
     // --------------------------------------------------------------------------
-    const star = document.querySelector('.about__star');
-    if (star) {
-        let rotation = 0;
-        star.addEventListener('mouseenter', function() {
-            rotation += 180;
-            this.style.transform = `rotate(${rotation}deg)`;
+    const burger = document.getElementById('burger');
+    const menu = document.getElementById('mobile-menu');
+    if (burger && menu) {
+        const setMenuOpen = (open) => {
+            burger.classList.toggle('burger--open', open);
+            menu.classList.toggle('menu--open', open);
+            burger.setAttribute('aria-expanded', String(open));
+            burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+            menu.setAttribute('aria-hidden', String(!open));
+            document.body.classList.toggle('no-scroll', open);
+        };
+
+        burger.addEventListener('click', () => {
+            setMenuOpen(!menu.classList.contains('menu--open'));
+        });
+
+        // Close the menu when any link inside it is tapped
+        menu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => setMenuOpen(false));
+        });
+
+        // Expand/collapse the WORK category
+        menu.querySelectorAll('.menu__toggle').forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                const group = toggle.closest('.menu__group');
+                const open = group.classList.toggle('menu__group--open');
+                toggle.setAttribute('aria-expanded', String(open));
+            });
         });
     }
 
@@ -88,7 +213,6 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const messageValid = messageInput.value.trim().length > 0;
             submitBtn.disabled = !messageValid;
-            console.log('Step 2 validation:', messageValid, 'Button disabled:', submitBtn.disabled);
         }
 
         // Auto-resize textarea
@@ -161,7 +285,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                     
                     if (response.ok) {
-                        console.log('Form submitted successfully!');
                         showStep(3);
                     } else {
                         throw new Error('Form submission failed');
@@ -185,4 +308,3 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 });
-
