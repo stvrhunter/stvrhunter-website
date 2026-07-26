@@ -720,36 +720,99 @@
   // its own clock the first time the section enters view, whatever REVEAL_MODE
   // is set to. The old version was scrubbed and sheared in from the left, which
   // meant it ran backwards on every scroll-up and never settled.
+  // Soft-edged mask sweep. Two things made the first attempt chop: the gradient
+  // string was rebuilt every frame (re-parse + full repaint), and a 26% feather
+  // is narrow enough that the browser's rasterised ramp visibly steps across
+  // display type. So: build the gradient ONCE at 250% width with a ramp a full
+  // element-width wide, then only slide mask-position. Same reveal, one cheap
+  // property, and a fade edge too soft to band.
+  const SWEEP_GRADIENT =
+    'linear-gradient(90deg, #000 0%, #000 30%, rgba(0,0,0,0) 70%, rgba(0,0,0,0) 100%)';
+
+  function armMask(el) {
+    el.style.webkitMaskImage = SWEEP_GRADIENT;
+    el.style.maskImage = SWEEP_GRADIENT;
+    el.style.webkitMaskSize = '250% 100%';
+    el.style.maskSize = '250% 100%';
+    el.style.webkitMaskRepeat = 'no-repeat';
+    el.style.maskRepeat = 'no-repeat';
+    el.style.willChange = 'mask-position';
+    sweepMask(el, 0);
+  }
+
+  // p 0 → 1 walks mask-position 100% → 0%: at 100% the element sits under the
+  // gradient's transparent tail, at 0% under its solid head.
+  function sweepMask(el, p) {
+    const pos = `${(1 - p) * 100}% 0`;
+    el.style.webkitMaskPosition = pos;
+    el.style.maskPosition = pos;
+  }
+
+  function clearMask(el) {
+    el.style.webkitMaskImage = '';
+    el.style.maskImage = '';
+    el.style.webkitMaskSize = '';
+    el.style.maskSize = '';
+    el.style.webkitMaskRepeat = '';
+    el.style.maskRepeat = '';
+    el.style.webkitMaskPosition = '';
+    el.style.maskPosition = '';
+    el.style.willChange = '';
+  }
+
   function initContactReveal() {
     const rows = gsap.utils.toArray('.contact__step--active .contact__field');
     const buttons = document.querySelector('.contact__step--active .contact__buttons');
     if (!rows.length || !hasScrollTrigger) return;
 
-    // Each row wipes up from behind its own bottom edge — no skew, no sideways
-    // travel, so the big uppercase type stays legible the whole way through.
+    // Label and input sweep as separate lines rather than one block, so the
+    // reveal reads top-to-bottom instead of as a single sliding curtain.
+    const lines = [];
+    rows.forEach(row => {
+      const label = row.querySelector('.contact__label');
+      const input = row.querySelector('.contact__input');
+      if (label) lines.push(label);
+      if (input) lines.push(input);
+    });
+    if (!lines.length) return;
+
+    // Masked out up front so nothing flashes before the trigger fires — a proxy
+    // tween's onUpdate can't be relied on for the time-0 render.
+    lines.forEach(armMask);
+
     const tl = gsap.timeline({
-      defaults: { ease: 'power3.out' },
       scrollTrigger: { trigger: '.contact', start: 'top 75%', once: true },
     });
 
-    // fromTo, not from: the natural clip-path is `none`, and GSAP can't
-    // interpolate an inset() toward that — the end state has to be spelled out.
-    tl.fromTo(rows,
-      {
-        autoAlpha: 0,
-        y: 34,
-        clipPath: 'inset(0% 0% 100% 0%)',
-      },
-      {
-        autoAlpha: 1,
-        y: 0,
-        clipPath: 'inset(0% 0% 0% 0%)',
-        duration: 0.9,
-        stagger: 0.14,
-      }, 0);
+    // Deliberately long and heavily overlapped: at 0.28 apart against a 1.9s
+    // sweep, line 4 starts while line 1 is barely half-revealed, so the section
+    // reads as one continuous wash instead of four separate events firing.
+    const STEP = 0.28;
+
+    lines.forEach((el, i) => {
+      const proxy = { p: 0 };
+      tl.to(proxy, {
+        p: 1,
+        duration: 1.9,
+        // power1, not power3 — a hard-decelerating ease spends most of the tween
+        // creeping, which is exactly when a mask edge looks like it's ratcheting.
+        ease: 'power1.inOut',
+        onUpdate: () => sweepMask(el, proxy.p),
+        // Inline masks left on inputs clip the caret and focus outline.
+        onComplete: () => clearMask(el),
+      }, i * STEP);
+
+      // 8px of lift, running the full length of the sweep so the two never
+      // finish at different times and read as two separate moves.
+      tl.fromTo(el,
+        { y: 8 },
+        { y: 0, duration: 1.9, ease: 'power2.out' },
+        i * STEP);
+    });
 
     if (buttons) {
-      tl.from(buttons, { autoAlpha: 0, y: 14, duration: 0.6 }, 0.35);
+      tl.from(buttons, { autoAlpha: 0, y: 12, duration: 0.9, ease: 'power2.out' },
+        (lines.length - 1) * STEP + 0.8);
     }
   }
 
