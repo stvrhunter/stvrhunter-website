@@ -37,6 +37,23 @@
   const hasSplitText = typeof SplitText !== 'undefined';
   const hasDrawSVG = typeof DrawSVGPlugin !== 'undefined';
 
+  /* ========================================================================
+     REVEAL MODE — flip this one line to switch every animation below the hero
+     ========================================================================
+       'scrub' : progress is tied to scroll position. Scroll up and the
+                 animation runs backwards. Nothing ever finishes and latches.
+       'once'  : each animation plays through at its own pace the first time
+                 it comes into view, then stays done.
+
+     Everything else adapts automatically — see revealTrigger() and playEase()
+     below. The hero entrance is unaffected either way; it always plays once,
+     on load.
+     ======================================================================== */
+
+  const REVEAL_MODE = 'scrub'; // <-- 'scrub' or 'once'
+
+  const isScrub = REVEAL_MODE === 'scrub';
+
   if (hasScrollTrigger) {
     // Mobile browsers fire resize when the address bar hides/shows; refreshing
     // on that causes jumps. Ignore it.
@@ -183,6 +200,38 @@
   const introReady = withTimeout(Promise.all([fontsReady, modelReady]), 2500);
 
   /* ------------------------------------------------------------------------
+     Reveal plumbing — the two modes
+     ------------------------------------------------------------------------
+     In 'scrub' mode, `scrub: 1` gives the timeline a 1s catch-up rather than
+     welding it to the scrollbar; without it, character-level text looks
+     twitchy. `invalidateOnRefresh` re-measures the from-values on resize,
+     since these tweens read layout that reflows.
+
+     In 'once' mode the end position is irrelevant — the animation is triggered
+     at `start` and then plays on its own clock.
+     ---------------------------------------------------------------------- */
+
+  function revealTrigger(trigger, start, end) {
+    if (!isScrub) {
+      return { trigger: trigger, start: start, once: true };
+    }
+    return {
+      trigger: trigger,
+      start: start,
+      end: end,
+      scrub: 1,
+      invalidateOnRefresh: true,
+    };
+  }
+
+  // Scrubbing supplies its own pacing, so an eased sub-tween fights the scroll
+  // and the linear version reads better. Playing once, the ease is the whole
+  // character of the movement. This picks per mode.
+  function playEase(name) {
+    return isScrub ? 'none' : name;
+  }
+
+  /* ------------------------------------------------------------------------
      About — line-by-line reveal
      ------------------------------------------------------------------------
      Split to lines, not characters: the paragraph has inline <img> elements
@@ -205,8 +254,10 @@
         autoAlpha: 0,
         y: 40,
         duration: 0.9,
-        ease: 'power3.out',
-        scrollTrigger: hasScrollTrigger ? { trigger: '.about', start: 'top 75%' } : undefined,
+        ease: playEase('power3.out'),
+        scrollTrigger: hasScrollTrigger
+          ? revealTrigger('.about', 'top 85%', 'center 55%')
+          : undefined,
       });
       return;
     }
@@ -229,35 +280,39 @@
         // the whole paragraph washes in left to right. No movement at all —
         // pure opacity, which is what keeps it smooth.
         const tl = gsap.timeline({
-          scrollTrigger: { trigger: el, start: 'top 82%', once: true },
+          scrollTrigger: revealTrigger(el, 'top 85%', 'bottom 45%'),
         });
 
-        tl.from(self.chars, {
-          autoAlpha: 0,
-          duration: 0.8,
-          ease: 'power1.out',
-          stagger: CHAR_STAGGER,
-        }, 0);
-
-        // The inline media arrive at the point in the sentence where they sit,
-        // rather than all together. querySelectorAll returns document order, so
-        // counting the characters seen before each element gives the exact
-        // moment the typing reaches it.
+        // Characters and inline media are walked in document order (which is
+        // what querySelectorAll returns) against a single moving time cursor.
+        // Each character advances the cursor by one stagger step; the media get
+        // placed at whatever the cursor reads when the walk reaches them, so
+        // they land exactly where they sit in the sentence.
+        //
+        // Placing each character individually rather than with one staggered
+        // tween is what makes the gradient rule possible: the wavy line
+        // advances the cursor by its own full duration, so the typing genuinely
+        // waits for it, and "and people" only starts once the line is 100%
+        // drawn. A single stagger can't hold a gap like that.
         const ordered = el.querySelectorAll(
           '.about-char, .about__portrait, .about__cat, .about__wave'
         );
 
-        let charsSoFar = 0;
+        const WAVE_DURATION = 0.9;
+        let at = 0;
+
         ordered.forEach((node) => {
           if (node.classList.contains('about-char')) {
-            charsSoFar++;
+            tl.from(node, {
+              autoAlpha: 0,
+              duration: 0.8,
+              ease: 'power1.out',
+            }, at);
+            at += CHAR_STAGGER;
             return;
           }
 
-          const at = charsSoFar * CHAR_STAGGER;
-
           if (node.classList.contains('about__wave')) {
-            // The wavy rule strokes itself on when the text reaches it.
             const path = node.querySelector('.about__wave-path');
             if (path && hasDrawSVG) {
               // The path's `d` starts at its right end, so drawing from 0%
@@ -266,20 +321,23 @@
               // matching the reading direction.
               tl.from(path, {
                 drawSVG: '100% 100%',
-                duration: 0.9,
+                duration: WAVE_DURATION,
                 ease: 'power2.inOut',
               }, at);
+              at += WAVE_DURATION; // typing resumes only once the line is complete
             }
             return;
           }
 
-          // Portrait and cat pop in.
+          // Portrait and cat pop in. These only nudge the cursor, so the
+          // sentence keeps typing around them.
           tl.from(node, {
             scale: 0,
             autoAlpha: 0,
             duration: 0.7,
             ease: 'back.out(2.2)',
           }, at);
+          at += 0.12;
         });
 
         return tl;
@@ -305,8 +363,8 @@
     const media = document.querySelector('.work__media');
 
     const tl = gsap.timeline({
-      defaults: { ease: 'power3.out' },
-      scrollTrigger: { trigger: panel, start: 'top 75%', once: true },
+      defaults: { ease: playEase('power3.out') },
+      scrollTrigger: revealTrigger(panel, 'top 85%', 'center 45%'),
     });
 
     if (heading && hasSplitText) {
@@ -319,7 +377,6 @@
         autoAlpha: 0,
         y: 18,
         duration: 0.55,
-        ease: 'power2.out',
         stagger: 0.04,
       }, 0);
     } else if (heading) {
@@ -328,19 +385,16 @@
 
     if (rest.length) tl.from(rest, { autoAlpha: 0, y: 20, duration: 0.7, stagger: 0.1 }, 0.25);
 
-    // The video irises open from its centre. 75% is the radius that just
-    // reaches the corners of the panel, so the circle is gone by the end.
+    // The video rises and fades in exactly like the heading words — same
+    // fade + lift, same ease, so the whole panel moves as one gesture. The
+    // travel is larger only because the element is: 18px on a 700px block
+    // wouldn't read as movement at all.
     if (media) {
-      tl.fromTo(
-        media,
-        { clipPath: 'circle(0% at 50% 50%)' },
-        {
-          clipPath: 'circle(75% at 50% 50%)',
-          duration: 1.2,
-          ease: 'power2.inOut',
-        },
-        0.1
-      );
+      tl.from(media, {
+        autoAlpha: 0,
+        y: 26,
+        duration: 0.8,
+      }, 0.1);
     }
   }
 
@@ -541,9 +595,9 @@
       x: -40,
       skewX: 6,
       duration: 0.8,
-      ease: 'power3.out',
+      ease: playEase('power3.out'),
       stagger: 0.12,
-      scrollTrigger: { trigger: '.contact', start: 'top 70%', once: true },
+      scrollTrigger: revealTrigger('.contact', 'top 80%', 'center 55%'),
     });
   }
 
@@ -551,14 +605,18 @@
     const links = gsap.utils.toArray('.footer__link');
     if (!links.length || !hasScrollTrigger) return;
 
-    const trigger = { trigger: '.footer', start: 'top bottom', once: true };
+    // The footer is the last thing on the page, so the range is measured
+    // against the footer's own height — 'bottom bottom' is guaranteed to be
+    // reachable, whereas anything expressed against the viewport centre would
+    // leave the typing permanently half-finished.
+    const trigger = revealTrigger('.footer', 'top bottom', 'bottom bottom');
 
     if (!hasSplitText) {
       gsap.from(links, {
         autoAlpha: 0,
         y: 18,
         duration: 0.6,
-        ease: 'back.out(2.5)',
+        ease: playEase('back.out(2.5)'),
         stagger: 0.06,
         scrollTrigger: trigger,
       });
