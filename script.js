@@ -2,9 +2,26 @@
    STVRHUNTER — JavaScript
    ========================================================================== */
 
+// --------------------------------------------------------------------------
+// Scroll lock. With ScrollSmoother running, `body { overflow: hidden }` does
+// nothing — the page is transformed inside #smooth-content, not scrolled — so
+// the smoother has to be paused instead. Falls back to the overflow trick when
+// ScrollSmoother isn't on the page (e.g. the project pages).
+// --------------------------------------------------------------------------
+function lockScroll(locked) {
+    const smoother =
+        typeof ScrollSmoother !== 'undefined' ? ScrollSmoother.get() : null;
+
+    if (smoother) {
+        smoother.paused(locked);
+    } else {
+        document.body.style.overflow = locked ? 'hidden' : '';
+    }
+}
+
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
-    
+
     // --------------------------------------------------------------------------
     // Header color on scroll
     // --------------------------------------------------------------------------
@@ -26,20 +43,69 @@ document.addEventListener('DOMContentLoaded', function() {
     const fsHint = fs && fs.querySelector('.showreel-fs__hint');
 
     if (showreel && fs && fsVideo) {
+        // Flip morphs the big video out of the docked one's exact rectangle, so
+        // the two reads as one object growing rather than a crossfade between
+        // two copies. Needs the docked video hidden during the morph, otherwise
+        // both are on screen at once.
+        const canFlip = typeof gsap !== 'undefined' && typeof Flip !== 'undefined';
+        let morphing = false;
+
         const openShowreel = () => {
+            if (morphing || fs.classList.contains('is-open')) return;
+
             // Start the big video where the small one is, so it feels continuous.
             try { fsVideo.currentTime = dockedVideo ? dockedVideo.currentTime : 0; } catch (e) {}
             fsVideo.play().catch(() => {});
             fs.classList.add('is-open');
             fs.setAttribute('aria-hidden', 'false');
-            document.body.style.overflow = 'hidden'; // lock scroll while open
+            lockScroll(true);
+
+            if (!canFlip || !dockedVideo) return;
+
+            morphing = true;
+            gsap.set(dockedVideo, { autoAlpha: 0 });
+
+            // Park the fullscreen video over the docked one, record that as the
+            // start state, snap back to its natural size, then animate the
+            // difference. This is the standard Flip.fit -> getState -> from
+            // pattern for morphing between two separate elements.
+            Flip.fit(fsVideo, dockedVideo, { scale: true });
+            const state = Flip.getState(fsVideo);
+            gsap.set(fsVideo, { clearProps: 'transform,width,height' });
+
+            Flip.from(state, {
+                duration: 0.7,
+                ease: 'power3.inOut',
+                scale: true,
+                onComplete: () => { morphing = false; },
+            });
         };
 
         const closeShowreel = () => {
-            fs.classList.remove('is-open');
-            fs.setAttribute('aria-hidden', 'true');
-            fsVideo.pause();
-            document.body.style.overflow = '';
+            if (morphing || !fs.classList.contains('is-open')) return;
+
+            const finish = () => {
+                fs.classList.remove('is-open');
+                fs.setAttribute('aria-hidden', 'true');
+                fsVideo.pause();
+                lockScroll(false);
+                if (canFlip) {
+                    gsap.set(fsVideo, { clearProps: 'transform,width,height' });
+                    if (dockedVideo) gsap.set(dockedVideo, { autoAlpha: 1 });
+                }
+                morphing = false;
+            };
+
+            if (!canFlip || !dockedVideo) return finish();
+
+            // Shrink back into the docked rectangle, then hand over.
+            morphing = true;
+            Flip.fit(fsVideo, dockedVideo, {
+                scale: true,
+                duration: 0.5,
+                ease: 'power3.inOut',
+                onComplete: finish,
+            });
         };
 
         showreel.addEventListener('click', openShowreel);
@@ -48,81 +114,34 @@ document.addEventListener('DOMContentLoaded', function() {
             if (e.key === 'Escape' && fs.classList.contains('is-open')) closeShowreel();
         });
 
-        // Make the "click anywhere to close" tip trail the cursor.
+        // Make the "click anywhere to close" tip trail the cursor. GSAP's
+        // quickTo writes transforms through a cached setter and eases the
+        // follow, so this costs no layout work per mousemove.
         if (fsHint) {
-            fs.addEventListener('mousemove', (e) => {
-                fsHint.style.left = e.clientX + 'px';
-                fsHint.style.top = e.clientY + 'px';
-            });
+            const OFFSET_X = 48; // clears the 64px gauntlet cursor art
+            const OFFSET_Y = 44;
+
+            if (typeof gsap !== 'undefined') {
+                const toX = gsap.quickTo(fsHint, 'x', { duration: 0.35, ease: 'power3' });
+                const toY = gsap.quickTo(fsHint, 'y', { duration: 0.35, ease: 'power3' });
+                fs.addEventListener('mousemove', (e) => {
+                    toX(e.clientX + OFFSET_X);
+                    toY(e.clientY + OFFSET_Y);
+                }, { passive: true });
+            } else {
+                fs.addEventListener('mousemove', (e) => {
+                    fsHint.style.transform =
+                        `translate(${e.clientX + OFFSET_X}px, ${e.clientY + OFFSET_Y}px)`;
+                }, { passive: true });
+            }
         }
     }
 
     // --------------------------------------------------------------------------
-    // Hero Grid Cursor Focus
+    // Smooth scroll navigation lives in js/animations.js — it uses GSAP's
+    // ScrollToPlugin, which plays nicely with ScrollTrigger. CSS
+    // `scroll-behavior: smooth` was removed for the same reason.
     // --------------------------------------------------------------------------
-    const heroGrid = document.querySelector('.hero__grid');
-    if (heroGrid) {
-        let gridFrame = null;
-        let pointerEvent = null;
-
-        const setGridActive = (active) => {
-            heroGrid.style.setProperty('--grid-hover-opacity', active ? '1' : '0');
-        };
-
-        const updateGridFocus = () => {
-            if (!pointerEvent) return;
-
-            const rect = heroGrid.getBoundingClientRect();
-            const insideGrid =
-                pointerEvent.clientX >= rect.left &&
-                pointerEvent.clientX <= rect.right &&
-                pointerEvent.clientY >= rect.top &&
-                pointerEvent.clientY <= rect.bottom;
-
-            if (!insideGrid) {
-                setGridActive(false);
-                gridFrame = null;
-                return;
-            }
-
-            const x = ((pointerEvent.clientX - rect.left) / rect.width) * 100;
-            const y = ((pointerEvent.clientY - rect.top) / rect.height) * 100;
-
-            heroGrid.style.setProperty('--grid-x', `${x}%`);
-            heroGrid.style.setProperty('--grid-y', `${y}%`);
-            setGridActive(true);
-            gridFrame = null;
-        };
-
-        document.addEventListener('pointermove', (event) => {
-            pointerEvent = event;
-
-            if (!gridFrame) {
-                gridFrame = requestAnimationFrame(updateGridFocus);
-            }
-        }, { passive: true });
-
-        document.addEventListener('pointerleave', () => {
-            setGridActive(false);
-            pointerEvent = null;
-        });
-    }
-
-    // --------------------------------------------------------------------------
-    // Smooth Scroll Navigation
-    // --------------------------------------------------------------------------
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
-        });
-    });
 
     // --------------------------------------------------------------------------
     // Lottie Animation - Blob
@@ -144,6 +163,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const burger = document.getElementById('burger');
     const menu = document.getElementById('mobile-menu');
     if (burger && menu) {
+        const menuLinks = menu.querySelectorAll('.menu__link, .menu__toggle');
+
         const setMenuOpen = (open) => {
             burger.classList.toggle('burger--open', open);
             menu.classList.toggle('menu--open', open);
@@ -151,6 +172,30 @@ document.addEventListener('DOMContentLoaded', function() {
             burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
             menu.setAttribute('aria-hidden', String(!open));
             document.body.classList.toggle('no-scroll', open);
+            lockScroll(open);
+
+            // The panel's fade stays in CSS (it owns visibility); GSAP just
+            // cascades the links on top of it.
+            if (typeof gsap === 'undefined' || !menuLinks.length) return;
+
+            if (open) {
+                gsap.fromTo(
+                    menuLinks,
+                    { autoAlpha: 0, y: 26 },
+                    {
+                        autoAlpha: 1,
+                        y: 0,
+                        duration: 0.5,
+                        ease: 'power3.out',
+                        stagger: 0.05,
+                        delay: 0.08,
+                        overwrite: true,
+                    }
+                );
+            } else {
+                // Clear the inline styles so a reopen starts clean.
+                gsap.set(menuLinks, { clearProps: 'all' });
+            }
         };
 
         burger.addEventListener('click', () => {
@@ -185,14 +230,46 @@ document.addEventListener('DOMContentLoaded', function() {
         const submitBtn = contactForm.querySelector('.contact__btn--submit');
         const backBtns = contactForm.querySelectorAll('.contact__btn-back');
 
-        // Show specific step
+        // Show specific step. The class swap still does the display: none /
+        // flex work — GSAP animates the incoming step's contents on top of it,
+        // and moves focus once the tween is done so the caret doesn't jump
+        // mid-animation.
         function showStep(stepNumber) {
+            const outgoing = contactForm.querySelector('.contact__step--active');
+            let incoming = null;
+
             steps.forEach(step => {
                 step.classList.remove('contact__step--active');
                 if (parseInt(step.dataset.step) === stepNumber) {
                     step.classList.add('contact__step--active');
+                    incoming = step;
                 }
             });
+
+            if (typeof gsap === 'undefined' || !incoming) return;
+
+            const forward = !outgoing || !(parseInt(outgoing.dataset.step) > stepNumber);
+            const parts = incoming.querySelectorAll(
+                '.contact__field, .contact__buttons, .contact__thankyou > *'
+            );
+
+            gsap.killTweensOf(parts);
+            gsap.fromTo(
+                parts.length ? parts : incoming,
+                { autoAlpha: 0, y: forward ? 24 : -24 },
+                {
+                    autoAlpha: 1,
+                    y: 0,
+                    duration: 0.55,
+                    ease: 'power3.out',
+                    stagger: 0.07,
+                    clearProps: 'transform',
+                    onComplete: () => {
+                        const field = incoming.querySelector('input, textarea');
+                        if (field) field.focus({ preventScroll: true });
+                    },
+                }
+            );
         }
 
         // Validate Step 1 (Name & Email)
@@ -304,6 +381,71 @@ document.addEventListener('DOMContentLoaded', function() {
             if (submitBtn) {
                 submitBtn.click();
             }
+        });
+    }
+
+    // --------------------------------------------------------------------------
+    // Page transitions
+    // --------------------------------------------------------------------------
+    // The veil is created here rather than in the markup, so every page —
+    // index and all the project pages — gets it without an HTML edit. A
+    // same-document navigation fades it up, then the browser navigates; on
+    // arrival it fades back out.
+    //
+    // A pageshow listener handles the back button: browsers restore a page from
+    // the back/forward cache with the veil still opaque, so it has to be
+    // cleared again on restore.
+    // --------------------------------------------------------------------------
+    if (typeof gsap !== 'undefined') {
+        const veil = document.createElement('div');
+        veil.className = 'page-veil';
+        document.body.appendChild(veil);
+
+        const hideVeil = () => {
+            gsap.to(veil, {
+                autoAlpha: 0,
+                duration: 0.45,
+                ease: 'power2.out',
+                onStart: () => { veil.style.pointerEvents = 'none'; },
+            });
+        };
+
+        // Fade in from the veil on arrival.
+        gsap.set(veil, { autoAlpha: 1 });
+        hideVeil();
+
+        window.addEventListener('pageshow', (e) => {
+            if (e.persisted) hideVeil();
+        });
+
+        const isInternalNav = (link, event) => {
+            if (event.defaultPrevented) return false;
+            if (event.button !== 0 || event.metaKey || event.ctrlKey ||
+                event.shiftKey || event.altKey) return false;
+            if (link.target && link.target !== '_self') return false;
+            if (link.hasAttribute('download')) return false;
+
+            const href = link.getAttribute('href');
+            if (!href || href.startsWith('#') || href.startsWith('mailto:') ||
+                href.startsWith('tel:')) return false;
+
+            // Same origin only — external links leave the site, no point veiling.
+            return new URL(link.href, location.href).origin === location.origin;
+        };
+
+        document.addEventListener('click', (e) => {
+            const link = e.target.closest('a[href]');
+            if (!link || !isInternalNav(link, e)) return;
+
+            e.preventDefault();
+            const url = link.href;
+
+            gsap.to(veil, {
+                autoAlpha: 1,
+                duration: 0.4,
+                ease: 'power2.inOut',
+                onComplete: () => { window.location.href = url; },
+            });
         });
     }
 

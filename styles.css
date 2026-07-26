@@ -87,8 +87,10 @@ select,
     cursor: url('assets/Pointer_gauntlet_glow.png') 10 10, pointer !important;
 }
 
+/* No `scroll-behavior: smooth` here on purpose — native smooth scrolling
+   fights GSAP's ScrollTrigger/ScrollToPlugin math. In-page navigation is
+   animated in js/animations.js instead. */
 html {
-    scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
@@ -190,7 +192,8 @@ button {
     transition: width var(--transition-base);
 }
 
-.nav__link:hover::after {
+.nav__link:hover::after,
+.nav__link--active::after {
     width: 100%;
 }
 
@@ -473,6 +476,8 @@ button {
     top: -0.08em;
 }
 
+/* Was a 15MB GIF, now an inline <video> — same footprint in the sentence, but
+   the browser decodes it off the main thread instead of stalling animation. */
 .about__cat {
     display: inline-block;
     vertical-align: middle;
@@ -485,6 +490,7 @@ button {
     top: -0.05em;
 }
 
+/* Inline SVG (was an <img>) so DrawSVGPlugin can stroke the path on. */
 .about__wave {
     display: inline-block;
     vertical-align: middle;
@@ -493,6 +499,7 @@ button {
     margin: 0 0.25em;
     position: relative;
     top: -0.05em;
+    overflow: visible;
 }
 
 /* --------------------------------------------------------------------------
@@ -702,13 +709,13 @@ button {
     display: block;
 }
 
-/* Tip that follows the cursor while fullscreen is open.
-   Offset clears the 64px gauntlet cursor art (hotspot 10 10). */
+/* Tip that follows the cursor while fullscreen is open. Position comes from
+   GSAP (quickTo, in script.js), including the offset that clears the 64px
+   gauntlet cursor art — so no transform is declared here. */
 .showreel-fs__hint {
     position: fixed;
     left: 0;
     top: 0;
-    transform: translate(48px, 44px);
     padding: 0.4em 0.7em;
     font-family: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, Consolas, monospace;
     font-size: 12px;
@@ -1138,6 +1145,7 @@ button {
     margin-left: 200px;
 }
 
+/* Was a 5MB GIF, now an inline <video>. */
 .contact__thankyou-gif {
     position: absolute;
     right: calc(var(--space-6) - 100px);
@@ -1379,6 +1387,65 @@ button {
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Section stacking
+   --------------------------------------------------------------------------
+   The hero paints a full-bleed WebGL sky and holds children at z-index 120.
+   Without an explicit stacking order the sections below it — and any element
+   ScrollSmoother has nudged out of position — can end up interleaved with it.
+   Every section after the hero sits on its own layer above it, and each one
+   clips its own contents so nothing can bleed across a section boundary.
+   -------------------------------------------------------------------------- */
+.hero {
+    position: relative;
+    z-index: 0;
+}
+
+.about,
+.work,
+.contact,
+.footer {
+    position: relative;
+    z-index: 1;
+}
+
+/* Clip these two, so nothing inside can cross a section edge. .contact is
+   deliberately left unclipped — its thank-you figure is positioned to hang
+   outside the section on purpose. */
+.about,
+.work {
+    overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   Page transition veil
+   --------------------------------------------------------------------------
+   Injected by script.js on every page, so project pages get it without any
+   markup changes. Fades up before navigating away, fades out on arrival.
+   Starts transparent + non-interactive: if JS never runs, it is invisible and
+   cannot block clicks.
+   -------------------------------------------------------------------------- */
+.page-veil {
+    position: fixed;
+    inset: 0;
+    z-index: 900;               /* over the header, under the showreel overlay */
+    background-color: var(--color-background);
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   ScrollSmoother
+   --------------------------------------------------------------------------
+   The plugin sets the wrapper/content styles it needs at runtime. These are
+   only here so the page is laid out sanely on the very first frame, before
+   ScrollSmoother.create() has run.
+   -------------------------------------------------------------------------- */
+#smooth-wrapper {
+    overflow: hidden;
 }
 
 /* Reduced motion */

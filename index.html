@@ -14,9 +14,15 @@
     <!-- Lottie Web Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
 
-    <!-- GSAP (core + ScrollTrigger) — global `gsap` / `ScrollTrigger` -->
+    <!-- GSAP (core + plugins) — all free since 3.13. Order matters only in that
+         core must come first; each plugin registers itself on the global scope. -->
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollSmoother.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollToPlugin.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Flip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/DrawSVGPlugin.min.js"></script>
 
     <!-- Three.js import map (must precede any `type="module"` script) -->
     <script type="importmap">
@@ -29,7 +35,7 @@
     </script>
 
     <!-- Styles -->
-    <link rel="stylesheet" href="styles.css?v=showreel-15">
+    <link rel="stylesheet" href="styles.css?v=gsap-10">
 </head>
 <body>
     <!-- Fixed Navigation -->
@@ -59,6 +65,12 @@
         </ul>
     </nav>
 
+    <!-- ScrollSmoother wrapper. Only <main> lives inside it — .header, .menu and
+         the showreel overlay are position:fixed and must stay outside, because
+         everything in #smooth-content is transformed on every frame. -->
+    <div id="smooth-wrapper">
+    <div id="smooth-content">
+
     <!-- Hero Section -->
     <main>
         <section id="sup" class="hero">
@@ -75,7 +87,8 @@
                 <div id="hero-3d" class="portrait__canvas" role="img" aria-label="STVRHUNTER 3D portrait"></div>
             </div>
 
-            <!-- pxpush-style monospace intro, bottom-right corner -->
+            <!-- pxpush-style monospace intro, bottom-right corner.
+                 Typed on by js/animations.js (SplitText chars + caret). -->
             <div class="hero__intro monospace">
                 <p class="hero__intro-body">art direction, design <br> and lowkey vibecoding</p>
             </div>
@@ -94,9 +107,13 @@
 
         <!-- About Section -->
         <section id="about" class="about">
+            <!-- No data-speed here on purpose: parallax displaces the block out
+                 of its own section, and this text was bleeding up over the
+                 hero's sky. Parallax only goes on elements with room around
+                 them (see the footer signature). -->
             <div class="about__content">
                 <p class="about__text">
-                    Hi!<img src="assets/portrait_lowpoly.png" alt="Portrait" class="about__portrait">I'm Artiom Zverev — a multidisciplinary designer with over 5 years of experience<img src="assets/cat_vibing.gif" alt="Cat vibing" class="about__cat">in different design fields. My goal is to create digital experiences for brands<span class="about__nowrap"><img src="assets/wavy_line.svg" alt="" class="about__wave">and</span> people.
+                    Hi!<img src="assets/portrait_lowpoly.png" alt="Portrait" class="about__portrait">I'm Artiom Zverev — a multidisciplinary designer with over 5 years of experience<video class="about__cat" autoplay muted loop playsinline aria-label="Cat vibing" src="assets/cat_vibing.mp4"></video>in different design fields. My goal is to create digital experiences for brands<span class="about__nowrap"><svg class="about__wave" viewBox="0 0 458 74" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path class="about__wave-path" d="M449.49 48.6093C383.712 98.4518 329.719 -19.2299 245.305 36.1494C160.89 91.5286 62.1317 38.9193 5.48974 11.2295" stroke="url(#wave-gradient)" stroke-width="25"/><defs><linearGradient id="wave-gradient" x1="26.0453" y1="13.9982" x2="461.869" y2="45.1988" gradientUnits="userSpaceOnUse"><stop stop-color="#05E400"/><stop offset="0.145168" stop-color="#3ED2DC"/><stop offset="0.355748" stop-color="#001AFF"/><stop offset="0.689601" stop-color="#FF9900"/><stop offset="1" stop-color="#FFE26E"/></linearGradient></defs></svg>and</span> people.
                 </p>
             </div>
         </section>
@@ -160,7 +177,7 @@
                         <div class="contact__thankyou">
                             <h2 class="contact__thankyou-title">THANKS FOR<br>REACHING ME OUT!</h2>
                             <p class="contact__thankyou-note">*I'LL WRITE YOU BACK<br>DURING NEXT 2 DAYS</p>
-                            <img src="assets/misha.gif" alt="Dancing figure" class="contact__thankyou-gif">
+                            <video class="contact__thankyou-gif" autoplay muted loop playsinline aria-label="Dancing figure" src="assets/misha.mp4"></video>
                         </div>
                     </div>
                 </form>
@@ -183,12 +200,15 @@
                 </div>
                 
                 <!-- Right: Signature -->
-                <div class="footer__signature-wrap">
+                <div class="footer__signature-wrap" data-speed="0.95">
                     <img src="assets/sign.png" alt="Signature" class="footer__signature">
                 </div>
             </div>
         </footer>
     </main>
+
+    </div><!-- /#smooth-content -->
+    </div><!-- /#smooth-wrapper -->
 
     <!-- Showreel fullscreen overlay (in-page; closes on click anywhere) -->
     <div class="showreel-fs" id="showreel-fs" aria-hidden="true">
@@ -197,15 +217,15 @@
     </div>
 
     <!-- Main JavaScript -->
-    <script src="script.js?v=showreel-fs-2"></script>
+    <script src="script.js?v=gsap-10"></script>
 
     <!-- GSAP animations (classic; relies on global gsap/ScrollTrigger above) -->
-    <script src="js/animations.js?v=3"></script>
+    <script src="js/animations.js?v=gsap-10"></script>
 
     <!-- Three.js scene (ES module; resolves `three` via the import map above) -->
-    <script type="module" src="js/three-scene.js?v=22-size"></script>
+    <script type="module" src="js/three-scene.js?v=gsap-10"></script>
 
     <!-- Fly-through clouds background (ES module; resolves `three` via the import map) -->
-    <script type="module" src="js/clouds.js?v=2"></script>
+    <script type="module" src="js/clouds.js?v=gsap-10"></script>
 </body>
 </html>
