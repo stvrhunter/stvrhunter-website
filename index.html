@@ -35,7 +35,7 @@
     </script>
 
     <!-- Styles -->
-    <link rel="stylesheet" href="styles.css?v=gsap-14">
+    <link rel="stylesheet" href="styles.css?v=gsap-19">
 </head>
 <body>
     <!-- Fixed Navigation -->
@@ -115,6 +115,76 @@
                 <p class="about__text">
                     Hi!<img src="assets/portrait_lowpoly.png" alt="Portrait" class="about__portrait">I'm Artiom Zverev — a multidisciplinary designer with over 5 years of experience<video class="about__cat" autoplay muted loop playsinline aria-label="Cat vibing" src="assets/cat_vibing.mp4"></video>in different design fields. My goal is to create digital experiences for brands<span class="about__nowrap"><svg class="about__wave" viewBox="0 0 458 74" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path class="about__wave-path" d="M449.49 48.6093C383.712 98.4518 329.719 -19.2299 245.305 36.1494C160.89 91.5286 62.1317 38.9193 5.48974 11.2295" stroke="url(#wave-gradient)" stroke-width="25"/><defs><linearGradient id="wave-gradient" x1="26.0453" y1="13.9982" x2="461.869" y2="45.1988" gradientUnits="userSpaceOnUse"><stop stop-color="#05E400"/><stop offset="0.145168" stop-color="#3ED2DC"/><stop offset="0.355748" stop-color="#001AFF"/><stop offset="0.689601" stop-color="#FF9900"/><stop offset="1" stop-color="#FFE26E"/></linearGradient></defs></svg>and</span> people.
                 </p>
+            </div>
+        </section>
+
+        <!-- ==================================================================
+             Showcase — placeholder cards
+             ------------------------------------------------------------------
+             No heading, no numbering, no captions: just the work.
+
+             Three layers per card, one transform each, so nothing fights over
+             the element's matrix:
+               .showcase__card   data-speed parallax → y  (ScrollSmoother)
+                 .showcase__frame reveal                 → clip, scale, blur
+                   .showcase__art   real media goes here
+
+             Every card is a plain grey rectangle for now. To drop real work in,
+             put an <img> or <video class="showcase__video"> inside its
+             .showcase__art — the sizing and object-fit are already handled.
+             ================================================================== -->
+        <section id="showcase" class="showcase">
+            <div class="showcase__scatter">
+            <div class="showcase__card showcase__card--1" data-speed="0.9">
+                <div class="showcase__frame">
+                    <div class="showcase__art"></div>
+                </div>
+            </div>
+            <div class="showcase__card showcase__card--2" data-speed="1.08">
+                <div class="showcase__frame">
+                    <div class="showcase__art"></div>
+                </div>
+            </div>
+            <div class="showcase__card showcase__card--3" data-speed="0.86">
+                <div class="showcase__frame">
+                    <div class="showcase__art"></div>
+                </div>
+            </div>
+            <div class="showcase__card showcase__card--4" data-speed="1.12">
+                <div class="showcase__frame">
+                    <div class="showcase__art"></div>
+                </div>
+            </div>
+            <div class="showcase__card showcase__card--5" data-speed="0.94">
+                <div class="showcase__frame">
+                    <div class="showcase__art"></div>
+                </div>
+            </div>
+            <div class="showcase__card showcase__card--6" data-speed="1.04">
+                <div class="showcase__frame">
+                    <div class="showcase__art"></div>
+                </div>
+            </div>
+            <div class="showcase__card showcase__card--7" data-speed="0.88">
+                <div class="showcase__frame">
+                    <div class="showcase__art"></div>
+                </div>
+            </div>
+            <div class="showcase__card showcase__card--8" data-speed="1.1">
+                <div class="showcase__frame">
+                    <div class="showcase__art"></div>
+                </div>
+            </div>
+            <div class="showcase__card showcase__card--9" data-speed="0.92">
+                <div class="showcase__frame">
+                    <div class="showcase__art"></div>
+                </div>
+            </div>
+            <div class="showcase__card showcase__card--10" data-speed="1.06">
+                <div class="showcase__frame">
+                    <div class="showcase__art"></div>
+                </div>
+            </div>
             </div>
         </section>
 
@@ -217,15 +287,15 @@
     </div>
 
     <!-- Main JavaScript -->
-    <script src="script.js?v=gsap-14"></script>
+    <script src="script.js?v=gsap-19"></script>
 
     <!-- GSAP animations (classic; relies on global gsap/ScrollTrigger above) -->
-    <script src="js/animations.js?v=gsap-14"></script>
+    <script src="js/animations.js?v=gsap-19"></script>
 
     <!-- Three.js scene (ES module; resolves `three` via the import map above) -->
-    <script type="module" src="js/three-scene.js?v=gsap-14"></script>
+    <script type="module" src="js/three-scene.js?v=gsap-19"></script>
 
     <!-- Fly-through clouds background (ES module; resolves `three` via the import map) -->
-    <script type="module" src="js/clouds.js?v=gsap-14"></script>
+    <script type="module" src="js/clouds.js?v=gsap-19"></script>
 </body>
 </html>

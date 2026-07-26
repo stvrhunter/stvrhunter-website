@@ -580,6 +580,44 @@
   // The footer signature is deliberately not animated — it just sits there.
 
   /* ------------------------------------------------------------------------
+     Showcase — card reveal
+     ------------------------------------------------------------------------
+     Each card develops into place: it arrives undersized, blurred and clipped
+     in from its edges, then resolves square. No hover, no rotation.
+     ---------------------------------------------------------------------- */
+
+  function initShowcase() {
+    const cards = gsap.utils.toArray('.showcase__card');
+    if (!cards.length || !hasScrollTrigger) return;
+
+    cards.forEach((card) => {
+      const frame = card.querySelector('.showcase__frame');
+      if (!frame) return;
+
+      gsap.fromTo(
+        frame,
+        {
+          autoAlpha: 0,
+          y: 72,
+          scale: 0.9,
+          filter: 'blur(14px)',
+          clipPath: 'inset(14% 14% 14% 14%)',
+        },
+        {
+          autoAlpha: 1,
+          y: 0,
+          scale: 1,
+          filter: 'blur(0px)',
+          clipPath: 'inset(0% 0% 0% 0%)',
+          duration: 1.3,
+          ease: playEase('power3.out'),
+          scrollTrigger: revealTrigger(card, 'top 92%', 'top 48%'),
+        }
+      );
+    });
+  }
+
+  /* ------------------------------------------------------------------------
      Contact + footer
      ------------------------------------------------------------------------
      Two more distinct flavours: the form's labels and fields shear in from the
@@ -723,6 +761,7 @@
     initPortraitScrub();
     initCloudVelocity();
     initAbout();
+    initShowcase();
     initWorkReveal();
     initWorkMediaScrub();
     initMagnetic();
@@ -730,6 +769,7 @@
     initFooterReveal();
     initNavActive();
   });
+
 
   initSmoothNav(reduceMotion ? 0 : 1.1);
 
