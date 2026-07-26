@@ -518,7 +518,7 @@ button {
 .showcase__scatter {
     display: grid;
     grid-template-columns: repeat(12, 1fr);
-    gap: clamp(2rem, 4vw, 5rem);
+    gap: clamp(1rem, 1.8vw, 2.25rem);
 }
 
 .showcase__card {
@@ -526,28 +526,49 @@ button {
     min-width: 0;
 }
 
-/* Columns, hang depth and proportion — the scatter itself. */
-.showcase__card--1  { grid-column: 1 / span 4;  margin-top: 0;    }
-.showcase__card--2  { grid-column: 6 / span 4;  margin-top: 9vh;  }
-.showcase__card--3  { grid-column: 10 / span 3; margin-top: 2vh;  }
-.showcase__card--4  { grid-column: 2 / span 3;  margin-top: 16vh; }
-.showcase__card--5  { grid-column: 6 / span 5;  margin-top: 4vh;  }
-.showcase__card--6  { grid-column: 11 / span 2; margin-top: 22vh; }
-.showcase__card--7  { grid-column: 1 / span 3;  margin-top: 8vh;  }
-.showcase__card--8  { grid-column: 5 / span 4;  margin-top: 26vh; }
-.showcase__card--9  { grid-column: 10 / span 3; margin-top: 12vh; }
-.showcase__card--10 { grid-column: 3 / span 5;  margin-top: 6vh;  }
+/* Columns, hang depth and proportion — the scatter itself.
+   Spans run 2–4 columns (three or four cards per row) and the hangs stay
+   shallow, so the block reads dense: more work per screen, none of it
+   line-up-and-tabulated. Cards are placed in source order, so each row's
+   columns must increase; a card that clashes with an earlier one starts the
+   next row — which is exactly how the row breaks below are produced. */
+.showcase__card--1  { grid-column: 1 / span 3;  margin-top: 0;    }
+.showcase__card--2  { grid-column: 5 / span 3;  margin-top: 5vh;  }
+.showcase__card--3  { grid-column: 9 / span 4;  margin-top: 1vh;  }
+
+.showcase__card--4  { grid-column: 1 / span 2;  margin-top: 7vh;  }
+.showcase__card--5  { grid-column: 4 / span 3;  margin-top: 2vh;  }
+.showcase__card--6  { grid-column: 8 / span 3;  margin-top: 9vh;  }
+.showcase__card--7  { grid-column: 11 / span 2; margin-top: 3vh;  }
+
+.showcase__card--8  { grid-column: 2 / span 3;  margin-top: 4vh;  }
+.showcase__card--9  { grid-column: 6 / span 2;  margin-top: 10vh; }
+.showcase__card--10 { grid-column: 9 / span 3;  margin-top: 2vh;  }
+
+.showcase__card--11 { grid-column: 1 / span 3;  margin-top: 8vh;  }
+.showcase__card--12 { grid-column: 5 / span 4;  margin-top: 1vh;  }
+.showcase__card--13 { grid-column: 10 / span 3; margin-top: 6vh;  }
+
+.showcase__card--14 { grid-column: 3 / span 2;  margin-top: 3vh;  }
+.showcase__card--15 { grid-column: 6 / span 3;  margin-top: 9vh;  }
+.showcase__card--16 { grid-column: 10 / span 2; margin-top: 2vh;  }
 
 .showcase__card--1  .showcase__frame { aspect-ratio: 4 / 5;   }
 .showcase__card--2  .showcase__frame { aspect-ratio: 1 / 1;   }
-.showcase__card--3  .showcase__frame { aspect-ratio: 3 / 4;   }
+.showcase__card--3  .showcase__frame { aspect-ratio: 16 / 10; }
 .showcase__card--4  .showcase__frame { aspect-ratio: 2 / 3;   }
-.showcase__card--5  .showcase__frame { aspect-ratio: 16 / 10; }
-.showcase__card--6  .showcase__frame { aspect-ratio: 1 / 2;   }
-.showcase__card--7  .showcase__frame { aspect-ratio: 3 / 4;   }
-.showcase__card--8  .showcase__frame { aspect-ratio: 1 / 1;   }
-.showcase__card--9  .showcase__frame { aspect-ratio: 4 / 5;   }
-.showcase__card--10 .showcase__frame { aspect-ratio: 16 / 9;  }
+.showcase__card--5  .showcase__frame { aspect-ratio: 3 / 4;   }
+.showcase__card--6  .showcase__frame { aspect-ratio: 1 / 1;   }
+.showcase__card--7  .showcase__frame { aspect-ratio: 2 / 3;   }
+.showcase__card--8  .showcase__frame { aspect-ratio: 16 / 9;  }
+.showcase__card--9  .showcase__frame { aspect-ratio: 3 / 4;   }
+.showcase__card--10 .showcase__frame { aspect-ratio: 1 / 1;   }
+.showcase__card--11 .showcase__frame { aspect-ratio: 4 / 5;   }
+.showcase__card--12 .showcase__frame { aspect-ratio: 16 / 9;  }
+.showcase__card--13 .showcase__frame { aspect-ratio: 1 / 1;   }
+.showcase__card--14 .showcase__frame { aspect-ratio: 3 / 4;   }
+.showcase__card--15 .showcase__frame { aspect-ratio: 16 / 10; }
+.showcase__card--16 .showcase__frame { aspect-ratio: 4 / 5;   }
 
 /* Owns the reveal (clip, scale, blur). */
 .showcase__frame {
@@ -575,45 +596,142 @@ button {
     background-color: var(--color-placeholder);
 }
 
-/* Showcase — tablet: two columns, shallower hangs */
+/* Showcase — tablet: three columns, shallow alternating hangs */
 @media (max-width: 1024px) {
     .showcase__scatter {
-        grid-template-columns: repeat(4, 1fr);
-        gap: var(--space-6);
+        grid-template-columns: repeat(6, 1fr);
+        gap: var(--space-4);
     }
 
-    .showcase__card:nth-child(odd)  { grid-column: 1 / span 2; margin-top: 0;   }
-    .showcase__card:nth-child(even) { grid-column: 3 / span 2; margin-top: 7vh; }
+    .showcase__card:nth-child(3n + 1) { grid-column: 1 / span 2; margin-top: 0;   }
+    .showcase__card:nth-child(3n + 2) { grid-column: 3 / span 2; margin-top: 5vh; }
+    .showcase__card:nth-child(3n)     { grid-column: 5 / span 2; margin-top: 2vh; }
 }
 
-/* Showcase — mobile: single column, no hangs (the offsets are just dead space
-   once nothing sits beside a card) */
+/* Showcase — mobile: two columns, no hangs (the offsets read as dead space at
+   this width) */
 @media (max-width: 640px) {
     .showcase {
         padding: var(--space-9) var(--container-padding);
     }
 
     .showcase__scatter {
-        grid-template-columns: 1fr;
-        gap: var(--space-6);
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-3);
     }
 
+    .showcase__card:nth-child(odd)  { grid-column: 1 / span 1 !important; }
+    .showcase__card:nth-child(even) { grid-column: 2 / span 1 !important; }
+
     .showcase__card {
-        grid-column: 1 / -1 !important;
         margin-top: 0 !important;
     }
 }
 
 /* --------------------------------------------------------------------------
-   Work Section — blue panel, text left, bigger media right
+   Work Section — text left, bigger media right
+   --------------------------------------------------------------------------
+   The section itself carries no colour or padding: .work__feature (the current
+   role) owns the blue, .work__past (everything before it) stays on the page's
+   grey and separates its entries with hairline rules instead. Both use the same
+   .work__panel, so the only difference between a featured role and a past one
+   is which wrapper it sits in.
    -------------------------------------------------------------------------- */
 .work {
-    padding: var(--space-9) var(--container-padding);
+    background-color: var(--color-background);
+
+    /* How much of a covered card stays visible once the next one has stacked
+       over it. js/animations.js reads this to place each card's stick point, so
+       the sliver and the layout can never drift apart. Sized to hold the first
+       line of a heading. */
+    --work-sliver: clamp(58px, 8vh, 104px);
+}
+
+/* The wrappers now only group the two kinds of role — every bit of padding and
+   colour lives on the cards, because a stacking card has to be opaque edge to
+   edge or the card beneath it shows through. */
+.work__feature,
+.work__past {
+    position: relative;
+}
+
+/* Past roles paint over the current one as they stack. */
+.work__past {
+    z-index: 2;
+}
+
+/* Current role — the only card on blue */
+.work__feature .work__panel {
     background-color: var(--color-primary);
 }
 
+/* Past roles — the page's own grey, hairline-divided. Every past card carries
+   the rule, so the divider is the card's own top edge and it keeps reading
+   correctly however the cards are stacked. */
+.work__panel--past {
+    background-color: var(--color-background);
+    border-top: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+/* Later cards must cover earlier ones once they stack. */
+.work__panel--past:nth-child(1) { z-index: 1; }
+.work__panel--past:nth-child(2) { z-index: 2; }
+.work__panel--past:nth-child(3) { z-index: 3; }
+.work__panel--past:nth-child(4) { z-index: 4; }
+.work__panel--past:nth-child(5) { z-index: 5; }
+.work__panel--past:nth-child(6) { z-index: 6; }
+
+/* Dark type, since these sit on grey rather than blue. */
+.work__panel--past .work__heading {
+    color: var(--color-text);
+}
+
+.work__panel--past .work__desc {
+    color: rgba(0, 0, 0, 0.55);
+}
+
+.work__panel--past .work__more {
+    color: var(--color-text);
+}
+
+.work__panel--past .work__more::after {
+    background-color: var(--color-text);
+}
+
+.work__panel--past .work__media {
+    background-color: rgba(0, 0, 0, 0.06);
+}
+
+/* The card: an index line, then the text/media row beneath it. Each role is a
+   card, so the padding sits here rather than on the wrapper — a stacking card
+   must be opaque edge to edge. The top padding is tighter than the bottom
+   because the stack cuts each card just below its index line, and a 64px gap
+   above that line would waste the whole sliver. */
 .work__panel {
     position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    width: 100%;
+    padding: var(--space-5) var(--container-padding) var(--space-9);
+}
+
+/* The line that stays visible once a card has been stacked over. */
+.work__index {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-regular);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-background);
+    opacity: 0.6;
+}
+
+.work__panel--past .work__index {
+    color: var(--color-text);
+    opacity: 0.45;
+}
+
+.work__body {
     display: flex;
     justify-content: space-between;
     align-items: stretch;
@@ -666,19 +784,17 @@ button {
     padding-bottom: var(--space-1);
 }
 
+/* No hover animation on this link, by request — the underline is simply always
+   there and the arrow never moves. (The magnetic cursor-follow that used to
+   live in js/animations.js is gone too.) */
 .work__more::after {
     content: '';
     position: absolute;
     left: 0;
     bottom: 0;
-    width: 0;
+    width: 100%;
     height: var(--underline-weight);
     background-color: var(--color-background);
-    transition: width var(--transition-base);
-}
-
-.work__more:hover::after {
-    width: 100%;
 }
 
 .work__more-arrow {
@@ -686,11 +802,6 @@ button {
     font-size: 1.1em;
     line-height: 1;
     transform: scaleX(-1) translateY(1px);
-    transition: transform var(--transition-base);
-}
-
-.work__more:hover .work__more-arrow {
-    transform: scaleX(-1) translate(-3px, 1px);
 }
 
 .work__media {
@@ -703,18 +814,16 @@ button {
     background-color: rgba(0, 0, 0, 0.15);
 }
 
-.work__video {
+/* The scroll scrub in js/animations.js owns this element's transform, so there
+   is no CSS hover scale here any more — the two would overwrite each other. */
+.work__video,
+.work__image {
     position: absolute;         /* out of flow → never inflates the height */
     inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
-    transition: transform var(--transition-base);
-}
-
-.work__media:hover .work__video {
-    transform: scale(1.015);
 }
 
 /* --------------------------------------------------------------------------
@@ -927,11 +1036,14 @@ button {
 }
 
 @media (max-width: 768px) {
-    .work {
-        padding: var(--space-7) var(--space-4);
+    /* No stacking at this width (see js/animations.js) — the cards are just a
+       divided list again, so they only need tighter padding. */
+    .work__panel {
+        padding: var(--space-5) var(--space-4) var(--space-7);
+        gap: var(--space-5);
     }
 
-    .work__panel {
+    .work__body {
         flex-direction: column;
         align-items: stretch;
         gap: var(--space-5);
@@ -1173,7 +1285,7 @@ button {
     background-color: var(--color-text);
     color: var(--color-background);
     border: none;
-    border-radius: 100px;
+    border-radius: 0;   /* square, matching the rest of the page's hard edges */
     font-family: var(--font-body);
     font-size: var(--text-base);
     font-weight: var(--weight-semibold);
@@ -1517,10 +1629,11 @@ button {
 /* Clip these, so nothing inside can cross a section edge — the showcase needs
    it most, since its tiles are parallaxed out of position. .contact is
    deliberately left unclipped: its thank-you figure is positioned to hang
-   outside the section on purpose. */
+   outside the section on purpose. .work is unclipped too, and must stay that
+   way: clipping an ancestor of a pinned element cuts the stacked cards off.
+   Nothing inside it overflows anyway — .work__media clips its own contents. */
 .about,
-.showcase,
-.work {
+.showcase {
     overflow: hidden;
 }
 

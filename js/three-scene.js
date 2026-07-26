@@ -324,6 +324,14 @@ function initHeroModel(container) {
   // Smoothed cursor offset applied on top of the fixed resting pose.
   const offset = { x: 0, y: 0 };
 
+  // Idle sway — the model turns slowly left and right on its own, so the hero
+  // is never completely still even when the cursor isn't moving.
+  //   IDLE_YAW   = how far it turns each way.
+  //   IDLE_SPEED = radians/sec fed to the sine, i.e. 2π / IDLE_SPEED seconds
+  //                for a full left-right-left cycle. 0.8 ≈ 7.9s round trip.
+  const IDLE_YAW = THREE.MathUtils.degToRad(14);
+  const IDLE_SPEED = 0.8;
+
   function renderFrame() {
     // Dynamic light orbits the model (paused for reduced-motion users).
     const t = prefersReducedMotion ? 0.5 : performance.now() * 0.001;
@@ -342,11 +350,17 @@ function initHeroModel(container) {
         offset.x += (target.x - offset.x) * 0.08;
         offset.y += (target.y - offset.y) * 0.08;
       }
-      // Resting pose + subtle lean toward the cursor + the scroll-driven turn:
-      // as the hero scrolls away the model rotates away from camera and recedes.
+      // Resting pose + idle sway + subtle lean toward the cursor + the
+      // scroll-driven turn: as the hero scrolls away the model rotates away
+      // from camera and recedes. The sway fades out as the hero leaves, so it
+      // doesn't fight the scroll turn.
+      const idleYaw = prefersReducedMotion
+        ? 0
+        : Math.sin(t * IDLE_SPEED) * IDLE_YAW * (1 - scrollProgress);
+
       pivot.rotation.set(
         BASE_PITCH + offset.y + scrollProgress * 0.28,
-        BASE_YAW + offset.x + scrollProgress * 0.85,
+        BASE_YAW + offset.x + idleYaw + scrollProgress * 0.85,
         BASE_ROLL + scrollProgress * 0.12
       );
       camera.position.z = baseDist * (1 + scrollProgress * 0.45);
@@ -389,6 +403,16 @@ function initHeroModel(container) {
   window.heroPortrait = {
     setScroll(p) {
       scrollProgress = Math.max(0, Math.min(1, p));
+    },
+    // Debug readout — handy in the console to confirm the idle sway is live:
+    // heroPortrait.pose() should show yawDeg changing while the page sits still.
+    pose() {
+      return {
+        yawDeg: THREE.MathUtils.radToDeg(pivot.rotation.y),
+        pitchDeg: THREE.MathUtils.radToDeg(pivot.rotation.x),
+        scrollProgress,
+        modelLoaded: !!model,
+      };
     },
   };
 

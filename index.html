@@ -35,7 +35,7 @@
     </script>
 
     <!-- Styles -->
-    <link rel="stylesheet" href="styles.css?v=gsap-19">
+    <link rel="stylesheet" href="styles.css?v=gsap-21">
 </head>
 <body>
     <!-- Fixed Navigation -->
@@ -135,52 +135,82 @@
              ================================================================== -->
         <section id="showcase" class="showcase">
             <div class="showcase__scatter">
-            <div class="showcase__card showcase__card--1" data-speed="0.9">
+            <div class="showcase__card showcase__card--1" data-speed="0.94">
                 <div class="showcase__frame">
                     <div class="showcase__art"></div>
                 </div>
             </div>
-            <div class="showcase__card showcase__card--2" data-speed="1.08">
+            <div class="showcase__card showcase__card--2" data-speed="1.05">
                 <div class="showcase__frame">
                     <div class="showcase__art"></div>
                 </div>
             </div>
-            <div class="showcase__card showcase__card--3" data-speed="0.86">
+            <div class="showcase__card showcase__card--3" data-speed="0.9">
                 <div class="showcase__frame">
                     <div class="showcase__art"></div>
                 </div>
             </div>
-            <div class="showcase__card showcase__card--4" data-speed="1.12">
+            <div class="showcase__card showcase__card--4" data-speed="1.08">
                 <div class="showcase__frame">
                     <div class="showcase__art"></div>
                 </div>
             </div>
-            <div class="showcase__card showcase__card--5" data-speed="0.94">
+            <div class="showcase__card showcase__card--5" data-speed="0.96">
                 <div class="showcase__frame">
                     <div class="showcase__art"></div>
                 </div>
             </div>
-            <div class="showcase__card showcase__card--6" data-speed="1.04">
+            <div class="showcase__card showcase__card--6" data-speed="1.03">
                 <div class="showcase__frame">
                     <div class="showcase__art"></div>
                 </div>
             </div>
-            <div class="showcase__card showcase__card--7" data-speed="0.88">
+            <div class="showcase__card showcase__card--7" data-speed="0.92">
                 <div class="showcase__frame">
                     <div class="showcase__art"></div>
                 </div>
             </div>
-            <div class="showcase__card showcase__card--8" data-speed="1.1">
+            <div class="showcase__card showcase__card--8" data-speed="1.07">
                 <div class="showcase__frame">
                     <div class="showcase__art"></div>
                 </div>
             </div>
-            <div class="showcase__card showcase__card--9" data-speed="0.92">
+            <div class="showcase__card showcase__card--9" data-speed="0.95">
                 <div class="showcase__frame">
                     <div class="showcase__art"></div>
                 </div>
             </div>
-            <div class="showcase__card showcase__card--10" data-speed="1.06">
+            <div class="showcase__card showcase__card--10" data-speed="1.04">
+                <div class="showcase__frame">
+                    <div class="showcase__art"></div>
+                </div>
+            </div>
+            <div class="showcase__card showcase__card--11" data-speed="0.91">
+                <div class="showcase__frame">
+                    <div class="showcase__art"></div>
+                </div>
+            </div>
+            <div class="showcase__card showcase__card--12" data-speed="1.06">
+                <div class="showcase__frame">
+                    <div class="showcase__art"></div>
+                </div>
+            </div>
+            <div class="showcase__card showcase__card--13" data-speed="0.97">
+                <div class="showcase__frame">
+                    <div class="showcase__art"></div>
+                </div>
+            </div>
+            <div class="showcase__card showcase__card--14" data-speed="1.02">
+                <div class="showcase__frame">
+                    <div class="showcase__art"></div>
+                </div>
+            </div>
+            <div class="showcase__card showcase__card--15" data-speed="0.93">
+                <div class="showcase__frame">
+                    <div class="showcase__art"></div>
+                </div>
+            </div>
+            <div class="showcase__card showcase__card--16" data-speed="1.05">
                 <div class="showcase__frame">
                     <div class="showcase__art"></div>
                 </div>
@@ -188,19 +218,108 @@
             </div>
         </section>
 
-        <!-- Work Section -->
+        <!-- ==================================================================
+             Work
+             ------------------------------------------------------------------
+             The section is only a container now: the current role sits in
+             .work__feature on the blue panel, every past role in .work__past on
+             the page's own grey, separated by hairline dividers rather than by
+             colour. Both blocks use the same .work__panel structure, so a role
+             can be moved between them by moving its markup.
+
+             Copy and imagery below the Replika entry are placeholders — swap
+             the headings, descriptions and .work__media contents for the real
+             thing.
+             ================================================================== -->
         <section id="work" class="work">
-            <div class="work__panel">
-                <div class="work__text">
-                    <h2 class="work__heading">Currently building brand and product in Repika</h2>
-                    <p class="work__desc">maintaining and enhancing replika's brand identity, building new features and shaping its overall look and feel.</p>
-                    <a href="projects/replika.html" class="work__more">
-                        Read more<span class="work__more-arrow" aria-hidden="true">&#8629;</span>
-                    </a>
+            <!-- Current role — the only one on blue -->
+            <div class="work__feature">
+                <div class="work__panel">
+                    <div class="work__index monospace">Nº001 / Replika — current</div>
+                    <div class="work__body">
+                    <div class="work__text">
+                        <h2 class="work__heading">Currently building brand and product in Repika</h2>
+                        <p class="work__desc">maintaining and enhancing replika's brand identity, building new features and shaping its overall look and feel.</p>
+                        <a href="projects/replika.html" class="work__more">
+                            Read more<span class="work__more-arrow" aria-hidden="true">&#8629;</span>
+                        </a>
+                    </div>
+
+                    <div class="work__media">
+                        <video class="work__video" autoplay muted loop playsinline src="assets/compilation.mp4"></video>
+                    </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Past roles — grey, divided by rules -->
+            <div class="work__past">
+                <div class="work__panel work__panel--past">
+                    <div class="work__index monospace">Nº002 / Alfa-Bank</div>
+                    <div class="work__body">
+                    <div class="work__text">
+                        <h2 class="work__heading">Built a 3D icon system for Alfa-Bank</h2>
+                        <p class="work__desc">a library of over 120 icons and illustrations, drawn once and reused across the app, the site and every campaign since.</p>
+                        <a href="projects/alfa.html" class="work__more">
+                            Read more<span class="work__more-arrow" aria-hidden="true">&#8629;</span>
+                        </a>
+                    </div>
+
+                    <div class="work__media">
+                        <img class="work__image" src="assets/projects/alfa.png" alt="Alfa-Bank 3D icon system" loading="lazy">
+                    </div>
+                    </div>
                 </div>
 
-                <div class="work__media">
-                    <video class="work__video" autoplay muted loop playsinline src="assets/compilation.mp4"></video>
+                <div class="work__panel work__panel--past">
+                    <div class="work__index monospace">Nº003 / Tochka</div>
+                    <div class="work__body">
+                    <div class="work__text">
+                        <h2 class="work__heading">Art direction and illustration at Tochka</h2>
+                        <p class="work__desc">a special project for a bank that wanted none of the usual banking visuals — set the direction, then drew the whole thing.</p>
+                        <a href="projects/tochka.html" class="work__more">
+                            Read more<span class="work__more-arrow" aria-hidden="true">&#8629;</span>
+                        </a>
+                    </div>
+
+                    <div class="work__media">
+                        <img class="work__image" src="assets/projects/tochka.png" alt="Tochka special project" loading="lazy">
+                    </div>
+                    </div>
+                </div>
+
+                <div class="work__panel work__panel--past">
+                    <div class="work__index monospace">Nº004 / Dion</div>
+                    <div class="work__body">
+                    <div class="work__text">
+                        <h2 class="work__heading">Product and brand visuals for Dion</h2>
+                        <p class="work__desc">illustration and motion for a video-calling product, from onboarding screens down to the empty states nobody plans for.</p>
+                        <a href="projects/dion.html" class="work__more">
+                            Read more<span class="work__more-arrow" aria-hidden="true">&#8629;</span>
+                        </a>
+                    </div>
+
+                    <div class="work__media">
+                        <img class="work__image" src="assets/projects/dion.png" alt="Dion special project" loading="lazy">
+                    </div>
+                    </div>
+                </div>
+
+                <div class="work__panel work__panel--past">
+                    <div class="work__index monospace">Nº005 / BAS</div>
+                    <div class="work__body">
+                    <div class="work__text">
+                        <h2 class="work__heading">3D and motion branding for BAS</h2>
+                        <p class="work__desc">a moving identity built around one shape — logo, type and a set of loops the team could keep animating without me.</p>
+                        <a href="projects/bas.html" class="work__more">
+                            Read more<span class="work__more-arrow" aria-hidden="true">&#8629;</span>
+                        </a>
+                    </div>
+
+                    <div class="work__media">
+                        <img class="work__image" src="assets/projects/BAS.jpg" alt="BAS 3D and motion branding" loading="lazy">
+                    </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -287,15 +406,15 @@
     </div>
 
     <!-- Main JavaScript -->
-    <script src="script.js?v=gsap-19"></script>
+    <script src="script.js?v=gsap-21"></script>
 
     <!-- GSAP animations (classic; relies on global gsap/ScrollTrigger above) -->
-    <script src="js/animations.js?v=gsap-19"></script>
+    <script src="js/animations.js?v=gsap-21"></script>
 
     <!-- Three.js scene (ES module; resolves `three` via the import map above) -->
-    <script type="module" src="js/three-scene.js?v=gsap-19"></script>
+    <script type="module" src="js/three-scene.js?v=gsap-21"></script>
 
     <!-- Fly-through clouds background (ES module; resolves `three` via the import map) -->
-    <script type="module" src="js/clouds.js?v=gsap-19"></script>
+    <script type="module" src="js/clouds.js?v=gsap-21"></script>
 </body>
 </html>

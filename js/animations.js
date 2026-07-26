@@ -329,13 +329,22 @@
             return;
           }
 
-          // Portrait and cat pop in. These only nudge the cursor, so the
-          // sentence keeps typing around them.
+          // Portrait and cat scale up from nothing — the growth is the effect.
+          // Only the overshoot is gone: power3.out settles exactly on full size
+          // instead of springing past it like back.out(2.2) did.
+          //
+          // The duration is long on purpose. In 'scrub' mode this whole
+          // timeline (~400 characters at CHAR_STAGGER) is squeezed into the
+          // section's scroll range, so a 0.7s tween was only ~7% of it — about
+          // 70px of scrolling, which snapped 0 to 1 in a frame or two and read
+          // as a plain fade. 2.2s gives the growth enough of the range to
+          // actually be seen.
           tl.from(node, {
             scale: 0,
             autoAlpha: 0,
-            duration: 0.7,
-            ease: 'back.out(2.2)',
+            duration: 2.2,
+            ease: 'power3.out',
+            transformOrigin: '50% 50%',
           }, at);
           at += 0.12;
         });
@@ -354,72 +363,158 @@
      Work — reveal on entry, then pin and scrub (desktop only)
      ---------------------------------------------------------------------- */
 
+  // Every .work__panel gets its own timeline against its own trigger — the
+  // featured role and each past one below it. Scoping the queries to the panel
+  // matters: a page-level querySelector would animate the first panel's
+  // heading with every panel's trigger, and toArray('.work__desc') would fire
+  // all four descriptions the moment the first one came into view.
   function initWorkReveal() {
-    const panel = document.querySelector('.work__panel');
-    if (!panel || !hasScrollTrigger) return;
+    const panels = gsap.utils.toArray('.work__panel');
+    if (!panels.length || !hasScrollTrigger) return;
 
-    const heading = document.querySelector('.work__heading');
-    const rest = gsap.utils.toArray('.work__desc, .work__more');
-    const media = document.querySelector('.work__media');
+    panels.forEach((panel) => {
+      const heading = panel.querySelector('.work__heading');
+      const rest = gsap.utils.toArray(panel.querySelectorAll('.work__desc, .work__more'));
+      const media = panel.querySelector('.work__media');
 
-    const tl = gsap.timeline({
-      defaults: { ease: playEase('power3.out') },
-      scrollTrigger: revealTrigger(panel, 'top 85%', 'center 45%'),
+      const tl = gsap.timeline({
+        defaults: { ease: playEase('power3.out') },
+        scrollTrigger: revealTrigger(panel, 'top 85%', 'center 45%'),
+      });
+
+      if (heading && hasSplitText) {
+        // Crisp word-by-word rise. Short duration, tight stagger — the opposite
+        // pace to the About paragraph's slow fade, which is what keeps the two
+        // sections feeling distinct. (An earlier 3D rotationX tumble read as
+        // goofy against this typeface.)
+        const split = SplitText.create(heading, { type: 'words', aria: 'auto' });
+        tl.from(split.words, {
+          autoAlpha: 0,
+          y: 18,
+          duration: 0.55,
+          stagger: 0.04,
+        }, 0);
+      } else if (heading) {
+        tl.from(heading, { autoAlpha: 0, y: 34, duration: 0.8 }, 0);
+      }
+
+      if (rest.length) tl.from(rest, { autoAlpha: 0, y: 20, duration: 0.7, stagger: 0.1 }, 0.25);
+
+      // The media rises and fades in exactly like the heading words — same
+      // fade + lift, same ease, so the whole panel moves as one gesture. The
+      // travel is larger only because the element is: 18px on a 700px block
+      // wouldn't read as movement at all.
+      if (media) {
+        tl.from(media, {
+          autoAlpha: 0,
+          y: 26,
+          duration: 0.8,
+        }, 0.1);
+      }
     });
-
-    if (heading && hasSplitText) {
-      // Crisp word-by-word rise. Short duration, tight stagger — the opposite
-      // pace to the About paragraph's slow fade, which is what keeps the two
-      // sections feeling distinct. (An earlier 3D rotationX tumble read as
-      // goofy against this typeface.)
-      const split = SplitText.create(heading, { type: 'words', aria: 'auto' });
-      tl.from(split.words, {
-        autoAlpha: 0,
-        y: 18,
-        duration: 0.55,
-        stagger: 0.04,
-      }, 0);
-    } else if (heading) {
-      tl.from(heading, { autoAlpha: 0, y: 34, duration: 0.8 }, 0);
-    }
-
-    if (rest.length) tl.from(rest, { autoAlpha: 0, y: 20, duration: 0.7, stagger: 0.1 }, 0.25);
-
-    // The video rises and fades in exactly like the heading words — same
-    // fade + lift, same ease, so the whole panel moves as one gesture. The
-    // travel is larger only because the element is: 18px on a 700px block
-    // wouldn't read as movement at all.
-    if (media) {
-      tl.from(media, {
-        autoAlpha: 0,
-        y: 26,
-        duration: 0.8,
-      }, 0.1);
-    }
   }
 
   // The video breathes very slightly as the section passes — no pinning, no
   // dimming of the copy. An earlier version pinned the panel and slid the text
   // out sideways while fading it; it read as a glitch rather than an effect,
   // because nothing about the layout suggested the text should leave.
-  function initWorkMediaScrub() {
-    const media = document.querySelector('.work__media');
-    if (!media || !hasScrollTrigger) return;
+  /* ------------------------------------------------------------------------
+     Work — cards stack up as you scroll
+     ------------------------------------------------------------------------
+     Each role card sticks under the header, one sliver lower than the card
+     before it, so the next card slides up over the last and leaves only its
+     top edge — heading's first line — showing. The covered cards pile up as a
+     hairline-divided stack while the bottom-most card is fully open, and the
+     whole pile releases together once the last card has arrived.
 
-    gsap.fromTo(
-      media,
-      { scale: 1 },
-      {
-        scale: 1.07,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: '.work',
-          start: 'top bottom',
-          end: 'bottom top',
-          scrub: 1,
-        },
+     Pinned via ScrollTrigger rather than `position: sticky`, because sticky is
+     resolved against the nearest transformed ancestor and ScrollSmoother
+     transforms #smooth-content on every frame — native sticky simply does not
+     work inside it. ScrollTrigger knows about the smoother and pins with a
+     transform of its own.
+
+     `pinSpacing: false` is what makes them overlap: with spacing on, each pin
+     would insert its own height as padding and the cards would queue up one
+     after another instead of covering each other.
+     ---------------------------------------------------------------------- */
+
+  function initWorkStack() {
+    const panels = gsap.utils.toArray('.work__panel');
+    if (panels.length < 2 || !hasScrollTrigger) return [];
+
+    const header = document.querySelector('.header');
+
+    // Both read at refresh time, so a resize (or a font landing and changing
+    // the header's height) re-measures instead of baking in stale pixels.
+    const headerH = () => (header ? header.getBoundingClientRect().height : 0);
+
+    // Measured from the card itself: the cut lands just under the index line, so
+    // a stacked card shows that line in full and nothing is sliced through the
+    // middle of a glyph. Falls back to the CSS var when there is no index line
+    // to measure.
+    const sliver = () => {
+      const index = panels[0].querySelector('.work__index');
+      if (index) {
+        const panelTop = panels[0].getBoundingClientRect().top;
+        const bottom = index.getBoundingClientRect().bottom - panelTop;
+        return Math.round(bottom + 14); // a little breathing room under the line
       }
+      const raw = getComputedStyle(document.querySelector('.work'))
+        .getPropertyValue('--work-sliver');
+      return parseFloat(raw) || 72;
+    };
+
+    const last = panels[panels.length - 1];
+    const restY = () => headerH() + (panels.length - 1) * sliver();
+
+    // The last card is never pinned: nothing has to cover it, and pinning it
+    // would freeze the section on screen after the stack is complete.
+    return panels.slice(0, -1).map((panel, i) =>
+      ScrollTrigger.create({
+        trigger: panel,
+        start: () => 'top ' + (headerH() + i * sliver()),
+        endTrigger: last,
+        end: () => 'top ' + restY(),
+        pin: true,
+        pinSpacing: false,
+        invalidateOnRefresh: true,
+        id: 'work-stack-' + i,
+      })
     );
+  }
+
+  function initWorkMediaScrub() {
+    const panels = gsap.utils.toArray('.work__panel');
+    if (!panels.length || !hasScrollTrigger) return;
+
+    // Measured against each panel rather than the whole section: with several
+    // entries stacked up, one range spanning all of .work would leave the lower
+    // media already fully scaled before they were ever on screen.
+    //
+    // The scale goes on the media *inside* the frame, not the frame itself. The
+    // frame is overflow:hidden, so the growth is clipped to the card instead of
+    // bleeding past its edge — which also means .work no longer needs its own
+    // overflow:hidden, and that matters because clipping an ancestor breaks the
+    // pinned stack above.
+    panels.forEach((panel) => {
+      const media = panel.querySelector('.work__video, .work__image');
+      if (!media) return;
+
+      gsap.fromTo(
+        media,
+        { scale: 1 },
+        {
+          scale: 1.07,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: panel,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 1,
+          },
+        }
+      );
+    });
   }
 
   /* ------------------------------------------------------------------------
@@ -522,60 +617,13 @@
   }
 
   /* ------------------------------------------------------------------------
-     Magnetic "Read more"
+     "Read more" — no hover effect at all
      ------------------------------------------------------------------------
-     quickTo keeps a single cached tween per property, so this is cheap enough
-     to drive straight off pointermove.
+     There used to be a magnetic pull here: the link chased the cursor within a
+     160px radius. It drifted out of alignment with the copy above it and read
+     as a bug rather than an effect, so it's gone. The link is a plain,
+     permanently underlined link now — see .work__more in styles.css.
      ---------------------------------------------------------------------- */
-
-  function initMagnetic() {
-    const link = document.querySelector('.work__more');
-    if (!link) return;
-
-    const PULL = 0.35;  // fraction of the cursor's offset the link travels
-    const RADIUS = 160; // px from the link's centre where the pull begins
-
-    const toX = gsap.quickTo(link, 'x', { duration: 0.45, ease: 'power3' });
-    const toY = gsap.quickTo(link, 'y', { duration: 0.45, ease: 'power3' });
-
-    // The link's centre is cached and only re-measured on scroll/resize, so
-    // pointermove itself does no layout reads. Measuring per-move would force a
-    // reflow on every mouse event, which is exactly what smooth scrolling
-    // cannot afford.
-    let cx = 0, cy = 0;
-    let queued = false;
-
-    const measure = () => {
-      const r = link.getBoundingClientRect();
-      cx = r.left + r.width / 2;
-      cy = r.top + r.height / 2;
-      queued = false;
-    };
-
-    const queueMeasure = () => {
-      if (queued) return;
-      queued = true;
-      requestAnimationFrame(measure);
-    };
-
-    measure();
-    window.addEventListener('scroll', queueMeasure, { passive: true });
-    window.addEventListener('resize', queueMeasure);
-    if (hasScrollTrigger) ScrollTrigger.addEventListener('refresh', measure);
-
-    window.addEventListener('pointermove', (e) => {
-      const dx = e.clientX - cx;
-      const dy = e.clientY - cy;
-
-      if (Math.hypot(dx, dy) > RADIUS) {
-        toX(0);
-        toY(0);
-        return;
-      }
-      toX(dx * PULL);
-      toY(dy * PULL);
-    }, { passive: true });
-  }
 
   // The footer signature is deliberately not animated — it just sits there.
 
@@ -624,37 +672,58 @@
      left, and the footer links spring up individually.
      ---------------------------------------------------------------------- */
 
+  // Deliberately NOT routed through revealTrigger(): this one always plays on
+  // its own clock the first time the section enters view, whatever REVEAL_MODE
+  // is set to. The old version was scrubbed and sheared in from the left, which
+  // meant it ran backwards on every scroll-up and never settled.
   function initContactReveal() {
-    const fields = gsap.utils.toArray('.contact__step--active .contact__field');
-    if (!fields.length || !hasScrollTrigger) return;
+    const rows = gsap.utils.toArray('.contact__step--active .contact__field');
+    const buttons = document.querySelector('.contact__step--active .contact__buttons');
+    if (!rows.length || !hasScrollTrigger) return;
 
-    gsap.from(fields, {
-      autoAlpha: 0,
-      x: -40,
-      skewX: 6,
-      duration: 0.8,
-      ease: playEase('power3.out'),
-      stagger: 0.12,
-      scrollTrigger: revealTrigger('.contact', 'top 80%', 'center 55%'),
+    // Each row wipes up from behind its own bottom edge — no skew, no sideways
+    // travel, so the big uppercase type stays legible the whole way through.
+    const tl = gsap.timeline({
+      defaults: { ease: 'power3.out' },
+      scrollTrigger: { trigger: '.contact', start: 'top 75%', once: true },
     });
+
+    // fromTo, not from: the natural clip-path is `none`, and GSAP can't
+    // interpolate an inset() toward that — the end state has to be spelled out.
+    tl.fromTo(rows,
+      {
+        autoAlpha: 0,
+        y: 34,
+        clipPath: 'inset(0% 0% 100% 0%)',
+      },
+      {
+        autoAlpha: 1,
+        y: 0,
+        clipPath: 'inset(0% 0% 0% 0%)',
+        duration: 0.9,
+        stagger: 0.14,
+      }, 0);
+
+    if (buttons) {
+      tl.from(buttons, { autoAlpha: 0, y: 14, duration: 0.6 }, 0.35);
+    }
   }
 
   function initFooterReveal() {
     const links = gsap.utils.toArray('.footer__link');
     if (!links.length || !hasScrollTrigger) return;
 
-    // The footer is the last thing on the page, so the range is measured
-    // against the footer's own height — 'bottom bottom' is guaranteed to be
-    // reachable, whereas anything expressed against the viewport centre would
-    // leave the typing permanently half-finished.
-    const trigger = revealTrigger('.footer', 'top bottom', 'bottom bottom');
+    // Always plays once on its own clock, whatever REVEAL_MODE is — scrubbing
+    // character-level typing here meant the handles un-typed themselves every
+    // time you scrolled back up off the bottom of the page.
+    const trigger = { trigger: '.footer', start: 'top bottom', once: true };
 
     if (!hasSplitText) {
       gsap.from(links, {
         autoAlpha: 0,
         y: 18,
         duration: 0.6,
-        ease: playEase('back.out(2.5)'),
+        ease: 'back.out(2.5)',
         stagger: 0.06,
         scrollTrigger: trigger,
       });
@@ -764,10 +833,18 @@
     initShowcase();
     initWorkReveal();
     initWorkMediaScrub();
-    initMagnetic();
     initContactReveal();
     initFooterReveal();
     initNavActive();
+  });
+
+  // The stacking cards are a desktop effect: below 768px the cards are taller
+  // than the viewport once they are one-column, so a stack would bury the copy
+  // instead of previewing it. matchMedia reverts the pins on its own when the
+  // query stops matching, so a resize past the breakpoint restores the plain
+  // divided list. Added after the block above so the smoother already exists.
+  mm.add('(prefers-reduced-motion: no-preference) and (min-width: 769px)', () => {
+    initWorkStack();
   });
 
 
