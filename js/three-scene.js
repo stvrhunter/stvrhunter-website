@@ -193,6 +193,11 @@ function initHeroModel(container) {
   const isDesktop = () => window.matchMedia('(min-width: 1024px)').matches;
   let sphereRadius = 1; // model bounding-sphere radius (set on load)
   let fitReady = false;
+  let baseDist = 3;     // camera distance that frames the model (set by frameModel)
+
+  // 0 while the hero fills the viewport, 1 once it has scrolled away. Driven by
+  // a scrubbed ScrollTrigger in js/animations.js via window.heroPortrait.
+  let scrollProgress = 0;
 
   // Frame the camera so the whole model fits regardless of viewport aspect
   // (fits the *smaller* dimension, so it never gets cropped on narrow screens).
@@ -204,6 +209,7 @@ function initHeroModel(container) {
     const distH = sphereRadius / Math.sin(hFov / 2);
     const zoom = ZOOM_BASE * (isDesktop() ? 1.15 : 1);
     const dist = (Math.max(distV, distH) * 1.15) / zoom;
+    baseDist = dist;
     camera.position.set(0, 0, dist);
     camera.near = Math.max(dist / 100, 0.01);
     camera.far = dist * 100;
@@ -284,10 +290,14 @@ function initHeroModel(container) {
       pivot.rotation.set(BASE_PITCH, BASE_YAW, BASE_ROLL);
 
       container.setAttribute('data-loaded', 'true');
+      // Lets js/animations.js hold the hero entrance until the model is in frame.
+      window.dispatchEvent(new CustomEvent('hero:model-ready'));
     },
     undefined,
     (err) => {
       console.error('[three-scene] failed to load model:', err);
+      // Still signal, so the hero entrance is never stranded behind a bad load.
+      window.dispatchEvent(new CustomEvent('hero:model-ready'));
     }
   );
 
@@ -314,10 +324,7 @@ function initHeroModel(container) {
   // Smoothed cursor offset applied on top of the fixed resting pose.
   const offset = { x: 0, y: 0 };
 
-  let frame = null;
-  function animate() {
-    frame = requestAnimationFrame(animate);
-
+  function renderFrame() {
     // Dynamic light orbits the model (paused for reduced-motion users).
     const t = prefersReducedMotion ? 0.5 : performance.now() * 0.001;
 
@@ -335,8 +342,14 @@ function initHeroModel(container) {
         offset.x += (target.x - offset.x) * 0.08;
         offset.y += (target.y - offset.y) * 0.08;
       }
-      // Static resting pose + subtle lean toward the cursor.
-      pivot.rotation.set(BASE_PITCH + offset.y, BASE_YAW + offset.x, BASE_ROLL);
+      // Resting pose + subtle lean toward the cursor + the scroll-driven turn:
+      // as the hero scrolls away the model rotates away from camera and recedes.
+      pivot.rotation.set(
+        BASE_PITCH + offset.y + scrollProgress * 0.28,
+        BASE_YAW + offset.x + scrollProgress * 0.85,
+        BASE_ROLL + scrollProgress * 0.12
+      );
+      camera.position.z = baseDist * (1 + scrollProgress * 0.45);
 
       // The sun sweeps in an arc around the model (plus a cursor lean), so its
       // raking light throws self-shadows that visibly move across the face.
@@ -350,7 +363,18 @@ function initHeroModel(container) {
     }
     renderer.render(scene, camera);
   }
-  animate();
+
+  // Drive this scene from GSAP's ticker rather than a private rAF loop, so the
+  // portrait, the clouds and every tween advance on one shared frame. GSAP's
+  // lag smoothing also keeps things sane after a tab has been backgrounded.
+  const hasGsap = typeof gsap !== 'undefined';
+  let frame = null;
+  if (hasGsap) {
+    gsap.ticker.add(renderFrame);
+  } else {
+    const loop = () => { frame = requestAnimationFrame(loop); renderFrame(); };
+    loop();
+  }
 
   function onResize() {
     ({ w, h } = getSize());
@@ -360,9 +384,18 @@ function initHeroModel(container) {
   }
   window.addEventListener('resize', onResize);
 
+  // Control surface for js/animations.js. Kept deliberately small: this module
+  // owns the scene, animations.js owns when things happen.
+  window.heroPortrait = {
+    setScroll(p) {
+      scrollProgress = Math.max(0, Math.min(1, p));
+    },
+  };
+
   return {
     dispose() {
-      cancelAnimationFrame(frame);
+      if (hasGsap) gsap.ticker.remove(renderFrame);
+      else cancelAnimationFrame(frame);
       window.removeEventListener('resize', onResize);
       pmrem.dispose();
       renderer.dispose();

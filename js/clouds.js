@@ -175,27 +175,48 @@ function initClouds() {
   let last = performance.now();
   let running = false;
   let rafId = 0;
+  let boost = 1; // fly-through speed multiplier, driven by scroll velocity
 
-  function frame(now) {
-    const dt = (now - last) / 1000;
-    last = now;
-    travelled += dt * DRIFT_SPEED * 500;
+  // Shared with js/three-scene.js and all tweens via GSAP's ticker (one rAF for
+  // the whole page). deltaTime arrives in ms; clamp it so a stall doesn't
+  // teleport the camera forward through the field.
+  const hasGsap = typeof gsap !== 'undefined';
+
+  function tick(time, deltaTime) {
+    let dt;
+    if (typeof deltaTime === 'number') {
+      dt = Math.min(deltaTime, 50) / 1000;
+    } else {
+      const now = performance.now();
+      dt = Math.min(now - last, 50) / 1000;
+      last = now;
+    }
+    // Scroll-velocity boost decays back to 1 on its own, so a flick of the
+    // wheel rushes the clouds and they settle again.
+    boost += (1 - boost) * Math.min(1, dt * 2.2);
+    travelled += dt * DRIFT_SPEED * 500 * boost;
     camera.position.z = -(travelled % LOOP_LEN) + LOOP_LEN;
     camera.position.x += (mouseX - camera.position.x) * 0.01;
     camera.position.y += (-mouseY - camera.position.y) * 0.01;
     renderer.render(scene, camera);
-    rafId = requestAnimationFrame(frame);
   }
 
   function start() {
     if (running) return;
     running = true;
     last = performance.now();
-    rafId = requestAnimationFrame(frame);
+    if (hasGsap) {
+      gsap.ticker.add(tick);
+    } else {
+      const loop = () => { rafId = requestAnimationFrame(loop); tick(); };
+      loop();
+    }
   }
   function stop() {
+    if (!running) return;
     running = false;
-    cancelAnimationFrame(rafId);
+    if (hasGsap) gsap.ticker.remove(tick);
+    else cancelAnimationFrame(rafId);
   }
 
   if (prefersReducedMotion) {
@@ -213,6 +234,15 @@ function initClouds() {
     { threshold: 0 }
   );
   io.observe(el);
+
+  // Control surface for js/animations.js.
+  window.heroClouds = {
+    // 1 = idle drift. Clamped so a fast scroll can't fling the camera through
+    // the whole field in one frame.
+    setBoost(v) {
+      boost = Math.max(1, Math.min(9, v));
+    },
+  };
 
   console.info('[clouds] fly-through clouds ready.');
 }
