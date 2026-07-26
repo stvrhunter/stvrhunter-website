@@ -482,6 +482,11 @@ button {
     display: inline-block;
     vertical-align: middle;
     width: auto;
+    /* The file's own 640x360. Stated here so the sentence keeps its width from
+       the first paint instead of reflowing when the video's metadata lands — a
+       reflow mid-paragraph re-splits the text and forces every ScrollTrigger in
+       the section to re-measure, which is what makes a scrubbed reveal jump. */
+    aspect-ratio: 16 / 9;
     height: 0.85em;
     object-fit: cover;
     border-radius: 2px;
@@ -1530,6 +1535,7 @@ button {
 .footer__signature {
     width: clamp(50px, 6vw, 70px);
     height: auto;
+    aspect-ratio: 1 / 1;  /* sign.png is square — reserves its height before the 700KB PNG lands */
     mix-blend-mode: multiply;  /* hides the PNG's white background on the cream footer */
 }
 

@@ -60,6 +60,11 @@ function makeSkyEquirect() {
 // Seamless grayscale "cloud shadow" texture used as a light cookie (gobo).
 // White = full light, dark blobs = cloud shadows. Tiles seamlessly so it can be
 // scrolled forever; scrolling its offset makes the shadows drift over the model.
+// Seeded, NOT Math.random(): this texture is the key light's cookie, so where
+// its dark blobs sit decides how much light reaches the face. Fresh blobs on
+// every load meant a refresh could deal a pattern that leaves the face in full
+// light — the "sometimes overexposed" reload. One fixed seed => the same clouds
+// every time, while the scrolling offset still drifts them across the model.
 function makeCloudGobo() {
   const S = 512;
   const c = document.createElement('canvas');
@@ -68,9 +73,18 @@ function makeCloudGobo() {
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, S, S);
 
+  // mulberry32 — small, reproducible, plenty for blob placement.
+  let seed = 0x9e3779b9;
+  const rand = () => {
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+
   for (let i = 0; i < 8; i++) {
-    const x = Math.random() * S, y = Math.random() * S;
-    const r = S * (0.12 + Math.random() * 0.18);
+    const x = rand() * S, y = rand() * S;
+    const r = S * (0.12 + rand() * 0.18);
     // Hard, near-black core with a feathered rim => a strong, clearly visible
     // moving shadow (not a faint dimming).
     for (const dx of [-S, 0, S]) {
@@ -188,6 +202,15 @@ function initHeroModel(container) {
   let orbitR = 3;  // radius the dynamic light orbits at (set once the model is sized)
   let sunDist = 5; // how far the sun sits from the model (set on load)
 
+  // Zero point for every animated light. NOT performance.now() straight from the
+  // page clock: the sun's azimuth, the orbiting fill light and the cloud drift
+  // are all sine functions of it, so reading the page clock meant the model's
+  // first visible frame landed at whatever phase the GLB happened to finish at —
+  // cached load ~0.3s, cold load ~2s, a different lighting angle each refresh,
+  // and some of those angles blow the face out. Reset when the model lands, so
+  // frame one is always phase 0.
+  let clockStart = null;
+
   const ZOOM_BASE = 1.5; // render the model 1.5x larger in frame
   // Desktop shows the model 15% larger than smaller screens.
   const isDesktop = () => window.matchMedia('(min-width: 1024px)').matches;
@@ -289,6 +312,8 @@ function initHeroModel(container) {
       // Apply the resting pose immediately so the first frame is correct.
       pivot.rotation.set(BASE_PITCH, BASE_YAW, BASE_ROLL);
 
+      clockStart = performance.now(); // lights start their sweep from here, every load
+
       container.setAttribute('data-loaded', 'true');
       // Lets js/animations.js hold the hero entrance until the model is in frame.
       window.dispatchEvent(new CustomEvent('hero:model-ready'));
@@ -325,16 +350,15 @@ function initHeroModel(container) {
   const offset = { x: 0, y: 0 };
 
   // Idle sway — the model turns slowly left and right on its own, so the hero
-  // is never completely still even when the cursor isn't moving.
-  //   IDLE_YAW   = how far it turns each way.
-  //   IDLE_SPEED = radians/sec fed to the sine, i.e. 2π / IDLE_SPEED seconds
-  //                for a full left-right-left cycle. 0.8 ≈ 7.9s round trip.
+  // is never completely still even when the cursor isn't moving. Amplitude is
+  // deliberately smaller than the cursor parallax: it's a breath, not a spin.
   const IDLE_YAW = THREE.MathUtils.degToRad(14);
   const IDLE_SPEED = 0.8;
 
   function renderFrame() {
     // Dynamic light orbits the model (paused for reduced-motion users).
-    const t = prefersReducedMotion ? 0.5 : performance.now() * 0.001;
+    if (clockStart === null) clockStart = performance.now();
+    const t = prefersReducedMotion ? 0.5 : (performance.now() - clockStart) * 0.001;
 
     // Scroll the cloud cookie so its shadows drift across the model.
     cloudGobo.offset.set(t * 0.06, t * 0.028);
@@ -403,16 +427,6 @@ function initHeroModel(container) {
   window.heroPortrait = {
     setScroll(p) {
       scrollProgress = Math.max(0, Math.min(1, p));
-    },
-    // Debug readout — handy in the console to confirm the idle sway is live:
-    // heroPortrait.pose() should show yawDeg changing while the page sits still.
-    pose() {
-      return {
-        yawDeg: THREE.MathUtils.radToDeg(pivot.rotation.y),
-        pitchDeg: THREE.MathUtils.radToDeg(pivot.rotation.x),
-        scrollProgress,
-        modelLoaded: !!model,
-      };
     },
   };
 

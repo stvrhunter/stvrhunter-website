@@ -30,12 +30,10 @@
   if (typeof ScrollToPlugin !== 'undefined') plugins.push(ScrollToPlugin);
   if (typeof SplitText !== 'undefined') plugins.push(SplitText);
   if (typeof Flip !== 'undefined') plugins.push(Flip);
-  if (typeof DrawSVGPlugin !== 'undefined') plugins.push(DrawSVGPlugin);
   if (plugins.length) gsap.registerPlugin.apply(gsap, plugins);
 
   const hasScrollTrigger = typeof ScrollTrigger !== 'undefined';
   const hasSplitText = typeof SplitText !== 'undefined';
-  const hasDrawSVG = typeof DrawSVGPlugin !== 'undefined';
 
   /* ========================================================================
      REVEAL MODE — flip this one line to switch every animation below the hero
@@ -275,6 +273,14 @@
       aria: 'auto',             // keeps the original sentence readable to screen readers
       autoSplit: true,
       onSplit(self) {
+        // The chars are new elements on every re-split, but the inline media and
+        // the wave path survive it — so a tween from the previous split can still
+        // be writing to them. Killed first, or two writers fight over the same
+        // dash pattern and the wave tears into pieces.
+        gsap.killTweensOf(el.querySelectorAll(
+          '.about__portrait, .about__cat, .about__wave-path'
+        ));
+
         // Typewriter cadence, soft edges: characters arrive in sequence like
         // typing, but each one takes 0.5s to fade up instead of snapping on, so
         // the whole paragraph washes in left to right. No movement at all —
@@ -301,10 +307,18 @@
         const WAVE_DURATION = 0.9;
         let at = 0;
 
+        // Hidden states are set here, not inferred by from() tweens. A from()
+        // whose scrub progress has already run once and is then reset by a
+        // ScrollTrigger.refresh() (webfonts, videos, the 700KB signature — all
+        // of which land after these triggers are first measured) leaves every
+        // not-yet-started target sitting at its END value, so the tail of the
+        // reveal appears already-revealed while the head is still fading. set +
+        // to has no inferred values to lose.
         ordered.forEach((node) => {
           if (node.classList.contains('about-char')) {
-            tl.from(node, {
-              autoAlpha: 0,
+            gsap.set(node, { autoAlpha: 0 });
+            tl.to(node, {
+              autoAlpha: 1,
               duration: 0.8,
               ease: 'power1.out',
             }, at);
@@ -314,13 +328,30 @@
 
           if (node.classList.contains('about__wave')) {
             const path = node.querySelector('.about__wave-path');
-            if (path && hasDrawSVG) {
-              // The path's `d` starts at its right end, so drawing from 0%
-              // strokes right-to-left. Growing from '100% 100%' instead — the
-              // path's end point, which is its left end — draws left to right,
-              // matching the reading direction.
-              tl.from(path, {
-                drawSVG: '100% 100%',
+            if (path) {
+              // Hand-rolled dash draw instead of DrawSVGPlugin, because the
+              // plugin pairs a dash of `d` with a gap of `length - d`: the
+              // pattern then repeats exactly one path-length later, so the moment
+              // the offset and the dash come from even slightly different states
+              // (a re-split, a refresh, a second writer on the same path) the
+              // wrapped copy of the dash surfaces at the far end and the line
+              // renders as TWO pieces — a growing stroke plus an orphaned blob.
+              //
+              // A gap of 2 × length makes the pattern repeat every 3 lengths, so
+              // no second copy can ever land inside the path, whatever the offset
+              // is. One stroke, always.
+              //
+              // The path's `d` runs right-to-left, so length position 0 is its
+              // right end. Keeping the visible run anchored at position `length`
+              // and growing it backwards draws left to right, i.e. with the
+              // reading direction.
+              const L = path.getTotalLength();
+              gsap.set(path, {
+                strokeDasharray: L + 'px ' + (L * 2) + 'px',
+                strokeDashoffset: -L + 'px', // visible run = [L, L] — nothing yet
+              });
+              tl.to(path, {
+                strokeDashoffset: 0,         // visible run = [0, L] — whole line
                 duration: WAVE_DURATION,
                 ease: 'power2.inOut',
               }, at);
@@ -339,12 +370,12 @@
           // 70px of scrolling, which snapped 0 to 1 in a frame or two and read
           // as a plain fade. 2.2s gives the growth enough of the range to
           // actually be seen.
-          tl.from(node, {
-            scale: 0,
-            autoAlpha: 0,
+          gsap.set(node, { scale: 0, autoAlpha: 0, transformOrigin: '50% 50%' });
+          tl.to(node, {
+            scale: 1,
+            autoAlpha: 1,
             duration: 2.2,
             ease: 'power3.out',
-            transformOrigin: '50% 50%',
           }, at);
           at += 0.12;
         });
@@ -356,8 +387,8 @@
 
   // The portrait, cat video and wavy rule are animated inside initAbout()'s
   // timeline, at the moment the typing reaches each of them — see above. The
-  // wave is an inline <svg> in the markup (it used to be an <img>) purely so
-  // DrawSVGPlugin can reach the path.
+  // wave is an inline <svg> in the markup (it used to be an <img>) so its path
+  // can be stroked on with stroke-dasharray.
 
   /* ------------------------------------------------------------------------
      Work — reveal on entry, then pin and scrub (desktop only)
@@ -387,27 +418,40 @@
         // pace to the About paragraph's slow fade, which is what keeps the two
         // sections feeling distinct. (An earlier 3D rotationX tumble read as
         // goofy against this typeface.)
+        //
+        // set + to, never from(): these triggers are measured before the videos
+        // and webfonts land, so the panel's start line moves and a later
+        // ScrollTrigger.refresh() resets a scrub that had already run. A from()
+        // tween that gets reset that way strands every word whose stagger step
+        // hasn't begun at its END value — the tail of the heading reads as
+        // already revealed while the first words are still faint.
         const split = SplitText.create(heading, { type: 'words', aria: 'auto' });
-        tl.from(split.words, {
-          autoAlpha: 0,
-          y: 18,
+        gsap.set(split.words, { autoAlpha: 0, y: 18 });
+        tl.to(split.words, {
+          autoAlpha: 1,
+          y: 0,
           duration: 0.55,
           stagger: 0.04,
         }, 0);
       } else if (heading) {
-        tl.from(heading, { autoAlpha: 0, y: 34, duration: 0.8 }, 0);
+        gsap.set(heading, { autoAlpha: 0, y: 34 });
+        tl.to(heading, { autoAlpha: 1, y: 0, duration: 0.8 }, 0);
       }
 
-      if (rest.length) tl.from(rest, { autoAlpha: 0, y: 20, duration: 0.7, stagger: 0.1 }, 0.25);
+      if (rest.length) {
+        gsap.set(rest, { autoAlpha: 0, y: 20 });
+        tl.to(rest, { autoAlpha: 1, y: 0, duration: 0.7, stagger: 0.1 }, 0.25);
+      }
 
       // The media rises and fades in exactly like the heading words — same
       // fade + lift, same ease, so the whole panel moves as one gesture. The
       // travel is larger only because the element is: 18px on a 700px block
       // wouldn't read as movement at all.
       if (media) {
-        tl.from(media, {
-          autoAlpha: 0,
-          y: 26,
+        gsap.set(media, { autoAlpha: 0, y: 26 });
+        tl.to(media, {
+          autoAlpha: 1,
+          y: 0,
           duration: 0.8,
         }, 0.1);
       }
