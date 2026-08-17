@@ -47,7 +47,14 @@
 
     /* Layout */
     --container-max: 1440px;
-    --container-padding: var(--space-5);
+
+    /* The page's gutter — the vertical line everything hangs off. The brand
+       ("ARTIOM ZVEREV") sits on it, so every section has to use it too or the
+       page reads as two competing left edges. It steps down at 1024 and 768;
+       change it there, never per section. --container-padding is the old name,
+       kept as an alias so existing rules keep working. */
+    --gutter: var(--space-6);
+    --container-padding: var(--gutter);
 
     /* Transitions */
     --transition-fast: 150ms ease;
@@ -64,6 +71,22 @@
     --z-menu: 250;
     --z-fixed: 300;
     --z-modal: 400;
+}
+
+/* The gutter steps down with the layout. Both steps live here rather than in
+   the per-section breakpoint blocks further down, and in this order: a later
+   :root at the same specificity wins, so the 768 step has to come after the
+   1024 one or it never applies at all. */
+@media (max-width: 1024px) {
+    :root {
+        --gutter: var(--space-5);
+    }
+}
+
+@media (max-width: 768px) {
+    :root {
+        --gutter: var(--space-4);
+    }
 }
 
 /* --------------------------------------------------------------------------
@@ -134,7 +157,7 @@ button {
     left: 0;
     right: 0;
     z-index: var(--z-fixed);
-    padding: var(--space-5) var(--space-6);
+    padding: var(--space-5) var(--gutter);
     pointer-events: none;
     transition: background-color var(--transition-base);
 }
@@ -224,10 +247,9 @@ button {
 }
 
 @media (max-width: 768px) {
-    .header {
-        padding: var(--space-4);
-    }
-
+    /* No .header padding here — the tablet block below already sets it, and
+       being later in the file it would win anyway. The gutter handles the
+       horizontal side at every width. */
     .nav {
         display: none;
     }
@@ -271,7 +293,7 @@ button {
         inset: 0;
         z-index: var(--z-menu);
         background-color: var(--color-background);
-        padding: 120px var(--space-4) var(--space-6);
+        padding: 120px var(--gutter) var(--space-6);
         overflow-y: auto;
         opacity: 0;
         visibility: hidden;
@@ -281,6 +303,20 @@ button {
     .menu--open {
         opacity: 1;
         visibility: visible;
+    }
+
+    /* The header sits above the overlay so the brand and the close button stay
+       tappable — but the sky is gone behind them, so the white treatment from
+       .header:not(.header--scrolled) would leave the name invisible on cream.
+       The name goes back to brand blue — it is the mark, not another menu
+       item; the close button stays dark grey. The extra .header in the
+       selector is what outweighs that :not() rule. */
+    body.menu-is-open .header .header__brand {
+        color: var(--color-primary);
+    }
+
+    body.menu-is-open .header .burger__line {
+        background-color: var(--color-text-light);
     }
 
     .menu__list {
@@ -362,7 +398,7 @@ button {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: var(--space-9) var(--space-6) var(--space-6);
+    padding: var(--space-9) var(--gutter) var(--space-6);
     position: relative;
     overflow: hidden;
 }
@@ -437,7 +473,7 @@ button {
    About Section
    -------------------------------------------------------------------------- */
 .about {
-    padding: var(--space-6) var(--space-6) var(--space-9);
+    padding: var(--space-6) var(--gutter) var(--space-9);
     background-color: var(--color-background);
 }
 
@@ -838,7 +874,7 @@ button {
 /* Label + video stacked; the wrapper owns the hero positioning */
 .hero__reel {
     position: absolute;              /* stays in the hero, scrolls away with it */
-    left: var(--space-6);            /* flush with the header brand (.header padding) */
+    left: var(--gutter);             /* the page gutter — same line as the brand */
     bottom: var(--hero-baseline);
     z-index: 120;                    /* above the 3D portrait, below the nav */
     display: flex;
@@ -960,11 +996,11 @@ button {
    -------------------------------------------------------------------------- */
 .hero__intro {
     position: absolute;
-    right: var(--space-6);           /* flush with the nav's right edge (.header padding) */
+    right: var(--gutter);            /* the page gutter — same line as the nav's right edge */
     bottom: var(--hero-baseline);
     z-index: 120;                    /* above the 3D portrait, below the nav */
     width: max-content;              /* hug the text — breaks come from <br> only */
-    max-width: calc(100vw - 2 * var(--space-6));
+    max-width: calc(100vw - 2 * var(--gutter));
     color: rgba(255, 255, 255, 0.9);
     text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -1011,10 +1047,8 @@ button {
     /* Stays bottom-right, level with the mobile showreel's bottom edge.
        Narrow enough at 10px to clear the 42vw video beside it. */
     .hero__intro {
-        right: var(--space-4);       /* matches the mobile .header padding */
         left: auto;
         top: auto;
-        max-width: calc(100vw - 2 * var(--space-4));
         font-size: 10px;
         letter-spacing: 0.06em;
     }
@@ -1026,8 +1060,14 @@ button {
         --hero-baseline: 3vh;
     }
 
-    .hero__reel {
-        left: var(--space-4);        /* matches the mobile .header padding */
+    /* Three across stops fitting here: the showreel jumps to 42vw at this
+       breakpoint and runs straight through the viewport-centred label, and the
+       bio closes in on it from the right. So the cue gets the bottom line to
+       itself and the video + bio move up one line, rather than the label being
+       nudged off-centre or shrunk further. */
+    .hero__reel,
+    .hero__intro {
+        bottom: calc(var(--hero-baseline) + 42px);
     }
 
     .hero__reel-label {
@@ -1044,7 +1084,7 @@ button {
     /* No stacking at this width (see js/animations.js) — the cards are just a
        divided list again, so they only need tighter padding. */
     .work__panel {
-        padding: var(--space-5) var(--space-4) var(--space-7);
+        padding: var(--space-5) var(--gutter) var(--space-7);
         gap: var(--space-5);
     }
 
@@ -1073,18 +1113,14 @@ button {
    Responsive - Header / Hero / About
    -------------------------------------------------------------------------- */
 
-/* Tablet */
+/* Tablet — the gutter itself steps at the top of the file, next to :root */
 @media (max-width: 1024px) {
-    :root {
-        --container-padding: var(--space-4);
-    }
-
     .header {
-        padding: var(--space-4) var(--space-5);
+        padding: var(--space-4) var(--gutter);
     }
 
     .hero {
-        padding: var(--space-8) var(--space-5) var(--space-5);
+        padding: var(--space-8) var(--gutter) var(--space-5);
     }
 
     .hero__blob {
@@ -1093,11 +1129,11 @@ button {
     }
 
     .about {
-        padding: var(--space-6) var(--space-5) var(--space-8);
+        padding: var(--space-6) var(--gutter) var(--space-8);
     }
 
     .contact {
-        padding: 80px var(--space-5) var(--space-6);
+        padding: 80px var(--gutter) var(--space-6);
     }
 
     .contact__thankyou-note {
@@ -1108,7 +1144,7 @@ button {
 /* Mobile */
 @media (max-width: 768px) {
     .hero {
-        padding: var(--space-4);
+        padding: var(--space-4) var(--gutter);
         min-height: 100vh;
         min-height: 100dvh;
     }
@@ -1123,7 +1159,7 @@ button {
     }
 
     .about {
-        padding: var(--space-5) var(--space-4) var(--space-7);
+        padding: var(--space-5) var(--gutter) var(--space-7);
     }
 
     .about__text {
@@ -1198,7 +1234,7 @@ button {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    padding: 80px var(--space-6) var(--space-8);
+    padding: 80px var(--gutter) var(--space-8);
     background-color: var(--color-background);
     position: relative;
 }
@@ -1377,7 +1413,7 @@ button {
 /* Contact Form - Mobile */
 @media (max-width: 768px) {
     .contact {
-        padding: var(--space-6) var(--space-4);
+        padding: var(--space-6) var(--gutter);
         min-height: calc(100vh - 200px);
     }
 
@@ -1472,7 +1508,7 @@ button {
    Footer
    -------------------------------------------------------------------------- */
 .footer {
-    padding: var(--space-6);
+    padding: var(--space-6) var(--gutter);
     background-color: var(--color-background);
     position: relative;
 }
@@ -1542,20 +1578,20 @@ button {
 /* Footer - Tablet */
 @media (max-width: 1024px) {
     .footer {
-        padding: var(--space-5) var(--space-6);
+        padding: var(--space-5) var(--gutter);
     }
 }
 
 @media (max-width: 768px) {
     .footer {
-        padding: var(--space-5) var(--space-4);
+        padding: var(--space-5) var(--gutter);
     }
 }
 
 /* Footer - Mobile */
 @media (max-width: 480px) {
     .footer {
-        padding: var(--space-4);
+        padding: var(--space-4) var(--gutter);
         margin-top: calc(-1 * var(--space-4));
     }
 
@@ -1578,6 +1614,9 @@ button {
 
     .footer__signature-wrap {
         order: 2;
+        /* On top of the container's own gap — the signature needs air under the
+           link stack or it reads as a sixth item in the list. */
+        margin-top: var(--space-5);
     }
 
     .footer__signature {

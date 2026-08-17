@@ -172,6 +172,9 @@ document.addEventListener('DOMContentLoaded', function() {
             burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
             menu.setAttribute('aria-hidden', String(!open));
             document.body.classList.toggle('no-scroll', open);
+            // The header stays above the overlay, so it needs to know it is on
+            // cream rather than on the sky — see .menu-is-open in styles.css.
+            document.body.classList.toggle('menu-is-open', open);
             lockScroll(open);
 
             // The panel's fade stays in CSS (it owns visibility); GSAP just

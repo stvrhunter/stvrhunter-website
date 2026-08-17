@@ -46,6 +46,9 @@
      Everything else adapts automatically — see revealTrigger() and playEase()
      below. The hero entrance is unaffected either way; it always plays once,
      on load.
+
+     A section can opt out by passing its own mode to revealTrigger()/playEase()
+     — the About paragraph does, see ABOUT_MODE in initAbout().
      ======================================================================== */
 
   const REVEAL_MODE = 'scrub'; // <-- 'scrub' or 'once'
@@ -209,8 +212,8 @@
      at `start` and then plays on its own clock.
      ---------------------------------------------------------------------- */
 
-  function revealTrigger(trigger, start, end) {
-    if (!isScrub) {
+  function revealTrigger(trigger, start, end, mode) {
+    if (!(mode ? mode === 'scrub' : isScrub)) {
       return { trigger: trigger, start: start, once: true };
     }
     return {
@@ -225,8 +228,8 @@
   // Scrubbing supplies its own pacing, so an eased sub-tween fights the scroll
   // and the linear version reads better. Playing once, the ease is the whole
   // character of the movement. This picks per mode.
-  function playEase(name) {
-    return isScrub ? 'none' : name;
+  function playEase(name, mode) {
+    return (mode ? mode === 'scrub' : isScrub) ? 'none' : name;
   }
 
   /* ------------------------------------------------------------------------
@@ -240,11 +243,21 @@
 
      `autoSplit` re-splits on webfont load and on resize; `onSplit` rebuilds
      the tween each time so the reveal survives a re-flow.
+
+     This section overrides REVEAL_MODE: the paragraph types itself out once,
+     on its own clock, instead of running back and forth with the scrollbar.
+     Every duration below is therefore in real seconds — under 'scrub' they
+     were shares of the section's scroll range, which is why the scrubbed
+     values are so much longer.
      ---------------------------------------------------------------------- */
+
+  const ABOUT_MODE = 'once'; // <-- 'once' or 'scrub'; independent of REVEAL_MODE
 
   function initAbout() {
     const el = document.querySelector('.about__text');
     if (!el) return;
+
+    const aboutScrub = ABOUT_MODE === 'scrub';
 
     if (!hasSplitText || !hasScrollTrigger) {
       // No SplitText: fall back to revealing the paragraph as one block.
@@ -252,9 +265,9 @@
         autoAlpha: 0,
         y: 40,
         duration: 0.9,
-        ease: playEase('power3.out'),
+        ease: playEase('power3.out', ABOUT_MODE),
         scrollTrigger: hasScrollTrigger
-          ? revealTrigger('.about', 'top 85%', 'center 55%')
+          ? revealTrigger('.about', 'top 85%', 'center 55%', ABOUT_MODE)
           : undefined,
       });
       return;
@@ -262,7 +275,10 @@
 
     // Drives both the character cadence and, through it, when each piece of
     // inline media arrives — raise it and the whole paragraph slows together.
-    const CHAR_STAGGER = 0.024;
+    // Playing once, the whole paragraph is ~3s at 0.016; the scrubbed value
+    // has to be bigger to spread over the section's scroll range.
+    const CHAR_STAGGER = aboutScrub ? 0.024 : 0.016;
+    const CHAR_FADE = aboutScrub ? 0.8 : 0.5;
 
     // Split to chars, but through words and lines as well — chars alone become
     // inline-block and the browser would then break words mid-word. Splitting
@@ -286,7 +302,7 @@
         // the whole paragraph washes in left to right. No movement at all —
         // pure opacity, which is what keeps it smooth.
         const tl = gsap.timeline({
-          scrollTrigger: revealTrigger(el, 'top 85%', 'bottom 45%'),
+          scrollTrigger: revealTrigger(el, 'top 85%', 'bottom 45%', ABOUT_MODE),
         });
 
         // Characters and inline media are walked in document order (which is
@@ -304,7 +320,7 @@
           '.about-char, .about__portrait, .about__cat, .about__wave'
         );
 
-        const WAVE_DURATION = 0.9;
+        const WAVE_DURATION = aboutScrub ? 0.9 : 0.7;
         let at = 0;
 
         // Hidden states are set here, not inferred by from() tweens. A from()
@@ -319,7 +335,7 @@
             gsap.set(node, { autoAlpha: 0 });
             tl.to(node, {
               autoAlpha: 1,
-              duration: 0.8,
+              duration: CHAR_FADE,
               ease: 'power1.out',
             }, at);
             at += CHAR_STAGGER;
@@ -364,17 +380,18 @@
           // Only the overshoot is gone: power3.out settles exactly on full size
           // instead of springing past it like back.out(2.2) did.
           //
-          // The duration is long on purpose. In 'scrub' mode this whole
-          // timeline (~400 characters at CHAR_STAGGER) is squeezed into the
-          // section's scroll range, so a 0.7s tween was only ~7% of it — about
-          // 70px of scrolling, which snapped 0 to 1 in a frame or two and read
-          // as a plain fade. 2.2s gives the growth enough of the range to
-          // actually be seen.
+          // The scrubbed duration is long on purpose. In 'scrub' mode this
+          // whole timeline (~400 characters at CHAR_STAGGER) is squeezed into
+          // the section's scroll range, so a 0.7s tween was only ~7% of it —
+          // about 70px of scrolling, which snapped 0 to 1 in a frame or two and
+          // read as a plain fade. 2.2s gives the growth enough of the range to
+          // actually be seen. Playing once, seconds are seconds again and 0.8s
+          // is the whole growth.
           gsap.set(node, { scale: 0, autoAlpha: 0, transformOrigin: '50% 50%' });
           tl.to(node, {
             scale: 1,
             autoAlpha: 1,
-            duration: 2.2,
+            duration: aboutScrub ? 2.2 : 0.8,
             ease: 'power3.out',
           }, at);
           at += 0.12;
