@@ -34,7 +34,7 @@
     </script>
 
     <!-- Styles -->
-    <link rel="stylesheet" href="styles.css?v=gsap-30">
+    <link rel="stylesheet" href="styles.css?v=gsap-38">
 </head>
 <body>
     <!-- Fixed Navigation -->
@@ -44,8 +44,9 @@
             <nav class="nav">
                 <a href="#sup" class="nav__link">01/SUP</a>
                 <a href="#about" class="nav__link">02/ABOUT</a>
-                <a href="#work" class="nav__link">03/WORK</a>
-                <a href="#contact" class="nav__link">04/CONTACT</a>
+                <a href="#showcase" class="nav__link">03/SHOWCASE</a>
+                <a href="#work" class="nav__link">04/PROJECTS</a>
+                <a href="#contact" class="nav__link">05/CONTACT</a>
             </nav>
             <button class="burger" id="burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
                 <span class="burger__line"></span>
@@ -54,13 +55,22 @@
         </div>
     </header>
 
+    <!-- Running section label — fixed under the header, swapped by
+         js/animations.js as each section takes the viewport. Decorative: the
+         sections carry their own headings, so this is hidden from screen
+         readers rather than read out on every scroll. -->
+    <div class="section-label" id="section-label" aria-hidden="true">
+        <span class="section-label__text monospace"></span>
+    </div>
+
     <!-- Mobile Menu -->
     <nav class="menu" id="mobile-menu" aria-hidden="true">
         <ul class="menu__list">
             <li><a href="#sup" class="menu__link">01/SUP</a></li>
             <li><a href="#about" class="menu__link">02/ABOUT</a></li>
-            <li><a href="#work" class="menu__link">03/WORK</a></li>
-            <li><a href="#contact" class="menu__link">04/CONTACT</a></li>
+            <li><a href="#showcase" class="menu__link">03/SHOWCASE</a></li>
+            <li><a href="#work" class="menu__link">04/PROJECTS</a></li>
+            <li><a href="#contact" class="menu__link">05/CONTACT</a></li>
         </ul>
     </nav>
 
@@ -405,15 +415,15 @@
     </div>
 
     <!-- Main JavaScript -->
-    <script src="script.js?v=gsap-30"></script>
+    <script src="script.js?v=gsap-38"></script>
 
     <!-- GSAP animations (classic; relies on global gsap/ScrollTrigger above) -->
-    <script src="js/animations.js?v=gsap-30"></script>
+    <script src="js/animations.js?v=gsap-38"></script>
 
     <!-- Three.js scene (ES module; resolves `three` via the import map above) -->
-    <script type="module" src="js/three-scene.js?v=gsap-30"></script>
+    <script type="module" src="js/three-scene.js?v=gsap-38"></script>
 
     <!-- Fly-through clouds background (ES module; resolves `three` via the import map) -->
-    <script type="module" src="js/clouds.js?v=gsap-30"></script>
+    <script type="module" src="js/clouds.js?v=gsap-38"></script>
 </body>
 </html>

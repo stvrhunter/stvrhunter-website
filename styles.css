@@ -248,6 +248,106 @@ button {
 }
 
 /* --------------------------------------------------------------------------
+   Running section label
+   --------------------------------------------------------------------------
+   Fixed under the header, on the page gutter, so the brand and the label read
+   as one left-hand column. The text is swapped by js/animations.js as each
+   section takes the viewport; the colour follows the section it sits over —
+   white on the sky and on the blue work panel, dark on cream — the same rule
+   the header follows.
+   -------------------------------------------------------------------------- */
+.section-label {
+    position: fixed;
+    left: var(--gutter);
+    /* Clears the two-line brand: its own line-height, plus the header's top
+       padding, plus a gap. */
+    top: calc(var(--space-5) + 2.2em + var(--space-4));
+    z-index: var(--z-sticky);
+    pointer-events: none;
+    font-size: var(--text-brand);   /* only to make the 2.2em above resolve against the brand */
+    line-height: 1;
+}
+
+.section-label__text {
+    display: block;
+    font-size: var(--text-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-light);
+    white-space: nowrap;
+    transition: color var(--transition-base);
+}
+
+/* Over the sky and over the blue work panel */
+.section-label--light .section-label__text {
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+}
+
+/* The menu covers the page — the label underneath it would just be noise. */
+body.menu-is-open .section-label {
+    opacity: 0;
+}
+
+/* Static mode (see SECTION_LABEL_MODE in js/animations.js): the fixed line is
+   off and each section prints its own name instead. */
+body.labels-static .section-label {
+    display: none;
+}
+
+/* Archivo, not the monospace of the work index — the mark belongs to the
+   navigation family (nav links, menu links), which is what it is: a name for a
+   place. Leaving it monospace made it read as another Nº001-style annotation
+   sitting on top of the real one. */
+.section-mark {
+    font-family: var(--font-display);
+    font-size: var(--text-base);
+    font-weight: var(--weight-medium);
+    text-transform: uppercase;
+    color: var(--color-text-light);
+    margin-bottom: var(--space-6);
+}
+
+/* The colon is punctuation, not part of the name — it stays out of the label
+   data so the same strings can keep matching the nav. */
+.section-mark::after {
+    content: ':';
+}
+
+/* #work is the one section with no padding of its own — its panels carry it —
+   so the mark has to bring its own gutter and its own air. */
+#work > .section-mark {
+    padding: var(--space-9) var(--gutter) 0;
+    margin-bottom: var(--space-5);
+}
+
+/* Display mode: same mark, set as a chapter break. Beats .monospace on
+   specificity, so the class can stay on the element in every mode. */
+body.labels-display .section-mark {
+    font-family: var(--font-display);
+    font-size: var(--text-display);
+    font-weight: var(--weight-black);
+    line-height: 0.9;
+    letter-spacing: -0.05em;
+    text-transform: uppercase;
+    color: var(--color-text);
+    margin-bottom: var(--space-7);
+}
+
+body.labels-display #work > .section-mark {
+    padding-top: var(--space-10);
+    margin-bottom: var(--space-6);
+}
+
+@media (max-width: 768px) {
+    .section-label {
+        /* The mobile header is tighter and the brand is smaller, so the
+           offset is recomputed rather than inherited. */
+        top: calc(var(--space-4) + 2.2em + var(--space-3));
+    }
+}
+
+/* --------------------------------------------------------------------------
    Burger Button & Mobile Menu (hidden on desktop)
    -------------------------------------------------------------------------- */
 .burger {

@@ -678,6 +678,174 @@
   }
 
   /* ------------------------------------------------------------------------
+     Running section label
+     ------------------------------------------------------------------------
+     One fixed line under the brand naming whatever section owns the viewport.
+     The words match the nav exactly, so the label confirms the nav rather than
+     introducing a second vocabulary for the same places.
+
+     Two independent things are tracked:
+
+       1. WHICH SECTION — 'top center'/'bottom center', the same window
+          initNavActive() uses, so the label and the nav underline always agree.
+          #showcase has no nav entry of its own; it reads as 03/WORK because
+          that is what it is.
+
+       2. WHAT COLOUR — the label is fixed, so it passes over backgrounds the
+          section boundaries know nothing about: the sky, then cream, then the
+          blue feature panel inside an otherwise cream #work. Tone is therefore
+          driven by the dark-background elements themselves, not by section.
+     ---------------------------------------------------------------------- */
+
+  /* Which treatment is on. Flip this one line to compare:
+       'sticky' : one fixed line under the brand, swapped as you scroll.
+       'static' : the name printed at the top of each section, scrolling away
+                  with it — the same idiom as Nº001 / REPLIKA.
+       'display': the same printed mark, set in big display type as a chapter
+                  break rather than an annotation.
+     The names are identical either way; only the delivery changes. */
+  const SECTION_LABEL_MODE = 'static'; // 'sticky' | 'static' | 'display'
+
+  // Plain words, no numbering: the nav already carries the 01/02/03 system, and
+  // repeating it on the page turns every section into a second table of
+  // contents. #showcase and #work are named apart because they are different
+  // things — loose pieces versus the projects with a story behind them.
+  const SECTION_LABELS = [
+    ['#sup', 'SUP'],
+    ['#about', 'ABOUT'],
+    ['#showcase', 'SHOWCASE'],
+    ['#work', 'PROJECTS'],
+    ['#contact', 'CONTACT'],
+  ];
+
+  // Where a printed mark earns its place. The hero is skipped — it has the
+  // brand, the nav, the bio and the scroll cue already.
+  const STATIC_MARK_SECTIONS = ['#about', '#showcase', '#work', '#contact'];
+
+  // Everything the label crosses that is dark enough to need white type.
+  const DARK_BACKDROPS = ['.hero', '.work__feature'];
+
+  // Static mode: the mark is printed into the section itself, so it needs no
+  // tracking at all — it scrolls in and out with its own copy. Built here
+  // rather than written into index.html so the two modes stay one flag apart.
+  function initSectionMarks() {
+    const named = new Map(SECTION_LABELS);
+
+    STATIC_MARK_SECTIONS.forEach((selector) => {
+      const section = document.querySelector(selector);
+      const name = named.get(selector);
+      if (!section || !name) return;
+
+      const mark = document.createElement('div');
+      mark.className = 'section-mark';
+      mark.setAttribute('aria-hidden', 'true'); // the section's own heading is the real one
+      mark.textContent = name;
+      section.insertBefore(mark, section.firstChild);
+
+      if (hasScrollTrigger && !reduceMotion) revealMark(mark);
+    });
+  }
+
+  // Under reduced motion nothing is set on the mark at all, so it is simply
+  // there — no hidden state to undo.
+
+  // The mark announces the section, so it arrives before the section's own
+  // content rather than with it — hence its own trigger, 10% earlier than the
+  // 'top 85%' the headings use.
+  //
+  // `once`, not scrub, even though the sections around it scrub: a label that
+  // fades back out when you scroll up is a label you can't trust. It is the
+  // one thing on screen whose whole job is to still be there.
+  function revealMark(mark) {
+    gsap.set(mark, { autoAlpha: 0, y: 12 });
+    gsap.to(mark, {
+      autoAlpha: 1,
+      y: 0,
+      duration: 0.5,
+      ease: 'power3.out',
+      scrollTrigger: { trigger: mark, start: 'top 95%', once: true },
+    });
+  }
+
+  function initSectionLabel() {
+    // Both printed modes are the same markup; only the type changes.
+    if (SECTION_LABEL_MODE !== 'sticky') {
+      document.body.classList.add('labels-' + SECTION_LABEL_MODE);
+      initSectionMarks();
+      return;
+    }
+
+    const label = document.querySelector('.section-label');
+    const text = label && label.querySelector('.section-label__text');
+    if (!label || !text || !hasScrollTrigger) return;
+
+    let current = '';
+
+    // Crossfade rather than a hard swap: at this size a straight cut reads as a
+    // glitch, and the label is peripheral — it should change without asking for
+    // attention.
+    const setLabel = (next) => {
+      if (!next || next === current) return;
+      current = next;
+      if (reduceMotion) {
+        text.textContent = next;
+        return;
+      }
+      gsap.to(text, {
+        autoAlpha: 0,
+        duration: 0.18,
+        ease: 'power2.in',
+        onComplete() {
+          text.textContent = next;
+          gsap.to(text, { autoAlpha: 1, duration: 0.22, ease: 'power2.out' });
+        },
+      });
+    };
+
+    // First paint has nothing to fade from.
+    const first = document.querySelector(SECTION_LABELS[0][0]);
+    if (first) {
+      current = SECTION_LABELS[0][1];
+      text.textContent = current;
+    }
+
+    SECTION_LABELS.forEach(([selector, name]) => {
+      const section = document.querySelector(selector);
+      if (!section) return;
+
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top center',
+        end: 'bottom center',
+        onToggle(self) {
+          if (self.isActive) setLabel(name);
+        },
+      });
+    });
+
+    // Tone. Each backdrop owns a trigger whose window is "this element is
+    // behind the label", i.e. it starts when the element's top passes the
+    // label's line and ends when its bottom does — measured from the label
+    // itself so it keeps working if the header height changes.
+    const labelY = () => label.getBoundingClientRect().top + 8;
+
+    DARK_BACKDROPS.forEach((selector) => {
+      const el = document.querySelector(selector);
+      if (!el) return;
+
+      ScrollTrigger.create({
+        trigger: el,
+        start: () => 'top ' + labelY() + 'px',
+        end: () => 'bottom ' + labelY() + 'px',
+        invalidateOnRefresh: true,
+        onToggle(self) {
+          label.classList.toggle('section-label--light', self.isActive);
+        },
+      });
+    });
+  }
+
+  /* ------------------------------------------------------------------------
      "Read more" — no hover effect at all
      ------------------------------------------------------------------------
      There used to be a magnetic pull here: the link chased the cursor within a
@@ -922,6 +1090,7 @@
     if (heroAll.length) gsap.set(heroAll, { clearProps: 'all' });
     started = true;
     initNavActive();
+    initSectionLabel();
   });
 
   // Full motion, any width: smooth scroll, hero entrance, scroll reveals.
@@ -960,6 +1129,7 @@
     initContactReveal();
     initFooterReveal();
     initNavActive();
+    initSectionLabel();
   });
 
   // The stacking cards are a desktop effect: below 768px the cards are taller
