@@ -208,7 +208,7 @@ button {
 
 .nav__link {
     font-family: var(--font-body);
-    font-size: var(--text-md);
+    font-size: var(--text-base);
     font-weight: var(--weight-medium);
     text-transform: uppercase;
     position: relative;
@@ -800,7 +800,9 @@ button {
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
-    gap: var(--space-5);
+    /* Tight: the description is a subtitle to the heading, not a separate
+       block. "Read more" buys its own air back below. */
+    gap: var(--space-3);
 }
 
 .work__heading {
@@ -825,6 +827,7 @@ button {
 }
 
 .work__more {
+    margin-top: var(--space-3);
     position: relative;
     display: inline-flex;
     align-items: center;
