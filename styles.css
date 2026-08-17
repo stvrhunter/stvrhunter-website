@@ -18,11 +18,23 @@
     --font-display: Archivo, sans-serif;
     --font-body: Archivo, sans-serif;
 
-    /* Font Sizes (4 sizes) */
-    --text-sm: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);      /* 12-14px - tags, small labels */
-    --text-base: clamp(1rem, 0.9rem + 0.5vw, 1.25rem);         /* 16-20px - body, nav, buttons */
-    --text-display: clamp(2rem, 1.2rem + 4vw, 4.5rem);         /* 32-72px - headings, about */
-    --text-hero: clamp(4rem, 2rem + 10vw, 12rem);              /* 64-192px - hero moments */
+    /* Font sizes — the whole scale, six steps plus the brand.
+       Every size on the page comes from here: if a rule needs a size that is
+       not in this list, the answer is to move it to the nearest step, not to
+       write a new clamp in the rule. Each step already spans its own range, so
+       a breakpoint override is only needed where the curve genuinely bends
+       (the About paragraph and the contact form), never to "make it smaller on
+       mobile". */
+    --text-xs: clamp(10px, 0.9vw, 15px);                       /* 10-15px  - monospace hero labels */
+    --text-sm: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);      /* 12-14px  - tags, indexes, small labels */
+    --text-base: clamp(1rem, 0.9rem + 0.5vw, 1.25rem);         /* 16-20px  - body, buttons, links */
+    --text-md: clamp(1.1rem, 0.7rem + 1vw, 1.5rem);            /* 17.6-24  - nav, menu sublinks */
+    --text-lg: clamp(1.4rem, 1rem + 2.5vw, 2rem);              /* 22.4-32  - menu links, statement text on small screens */
+    --text-display: clamp(2rem, 1.2rem + 4vw, 4.5rem);         /* 32-72px  - headings, about, form fields */
+
+    /* The brand is deliberately its own size — it is the one piece of type on
+       the page that answers to nothing else. */
+    --text-brand: clamp(1.7rem, 1rem + 3vw, 3.6rem);           /* 27.2-57.6 */
 
     /* Font Weights */
     --weight-regular: 400;
@@ -176,7 +188,7 @@ button {
 
 .header__brand {
     font-family: var(--font-display);
-    font-size: clamp(1.7rem, 1rem + 3vw, 3.6rem);
+    font-size: var(--text-brand);
     font-weight: var(--weight-black);
     line-height: 0.9;
     letter-spacing: -0.05em;
@@ -196,7 +208,7 @@ button {
 
 .nav__link {
     font-family: var(--font-body);
-    font-size: clamp(1.1rem, 0.7rem + 1vw, 1.5rem);
+    font-size: var(--text-md);
     font-weight: var(--weight-medium);
     text-transform: uppercase;
     position: relative;
@@ -332,7 +344,7 @@ button {
         display: block;
         width: 100%;
         font-family: var(--font-display);
-        font-size: 1.75rem;
+        font-size: var(--text-lg);
         font-weight: var(--weight-medium);
         line-height: 0.95;
         letter-spacing: normal;
@@ -380,7 +392,7 @@ button {
     .menu__sublink {
         display: block;
         padding: var(--space-1) 0;
-        font-size: 1.125rem;
+        font-size: var(--text-md);
         font-weight: var(--weight-medium);
         text-transform: uppercase;
     }
@@ -840,7 +852,7 @@ button {
 
 .work__more-arrow {
     display: inline-block;
-    font-size: 1.1em;
+    font-size: 1.2em;
     line-height: 1;
     transform: scaleX(-1) translateY(1px);
 }
@@ -894,7 +906,7 @@ button {
     color: rgba(255, 255, 255, 0.9);
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    font-size: clamp(10px, 0.9vw, 15px);
+    font-size: var(--text-xs);
     line-height: 1;
     white-space: nowrap;
     text-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
@@ -970,7 +982,7 @@ button {
     top: 0;
     padding: 0.4em 0.7em;
     font-family: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, Consolas, monospace;
-    font-size: 12px;
+    font-size: var(--text-xs);
     letter-spacing: 0.08em;
     text-transform: uppercase;
     white-space: nowrap;
@@ -1004,7 +1016,7 @@ button {
     color: rgba(255, 255, 255, 0.9);
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    font-size: clamp(10px, 0.9vw, 15px);
+    font-size: var(--text-xs);
     text-align: right;
     text-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
     pointer-events: none;
@@ -1049,8 +1061,7 @@ button {
     .hero__intro {
         left: auto;
         top: auto;
-        font-size: 10px;
-        letter-spacing: 0.06em;
+        letter-spacing: 0.06em;    /* --text-xs already floors at 10px here */
     }
 }
 
@@ -1071,8 +1082,7 @@ button {
     }
 
     .hero__reel-label {
-        font-size: 10px;
-        letter-spacing: 0.06em;
+        letter-spacing: 0.06em;    /* --text-xs already floors at 10px here */
     }
 
     .showreel {
@@ -1163,7 +1173,7 @@ button {
     }
 
     .about__text {
-        font-size: clamp(1.5rem, 5vw, 2rem);
+        font-size: var(--text-lg);
         line-height: 1.4;
     }
 
@@ -1193,10 +1203,6 @@ button {
 
     .portrait__image {
         width: 135vw;
-    }
-
-    .about__text {
-        font-size: 1.4rem;
     }
 
     .about__portrait {
@@ -1422,13 +1428,13 @@ button {
     }
 
     .contact__label {
-        font-size: clamp(1.25rem, 5vw, 1.75rem);
+        font-size: var(--text-lg);
         line-height: 1.15;
         margin-bottom: var(--space-1);
     }
 
     .contact__input {
-        font-size: clamp(1.25rem, 5vw, 1.75rem);
+        font-size: var(--text-lg);
         line-height: 1.15;
     }
 
@@ -1445,7 +1451,7 @@ button {
     }
 
     .contact__thankyou-title {
-        font-size: clamp(1.5rem, 6vw, 2rem);
+        font-size: var(--text-lg);
         margin-bottom: var(--space-6);
     }
 
@@ -1466,12 +1472,12 @@ button {
 
 /* Contact Form - Small Mobile */
 @media (max-width: 480px) {
-    .contact__label {
-        font-size: clamp(2rem, 8vw, 2.5rem);
-    }
-
+    /* The form goes back up to --text-display here: at this width the field
+       is the only thing on screen, so the ≤768 step-down stops earning its
+       keep. */
+    .contact__label,
     .contact__input {
-        font-size: clamp(2rem, 8vw, 2.5rem);
+        font-size: var(--text-display);
     }
 
     .contact__buttons {
