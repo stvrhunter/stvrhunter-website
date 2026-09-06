@@ -7,3 +7,6 @@ Thumbs.db
 *.swp
 .vercel
 .env*
+
+# Raw work dump — local only
+_dump/
