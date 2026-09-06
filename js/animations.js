@@ -251,11 +251,43 @@
      values are so much longer.
      ---------------------------------------------------------------------- */
 
-  const ABOUT_MODE = 'once'; // <-- 'once' or 'scrub'; independent of REVEAL_MODE
+  /* The About paragraph is the page's opening statement, so the SHOWCASE mark
+     below it waits for the paragraph to finish rather than arriving over the
+     top of it — see whenAboutDone() and initSectionMarks(). The gate is open
+     from the start when there is no reveal to wait for. */
+  let aboutRevealDone = false;
+  const aboutDoneWaiters = [];
+
+  function whenAboutDone(run) {
+    if (aboutRevealDone) run();
+    else aboutDoneWaiters.push(run);
+  }
+
+  function markAboutDone() {
+    if (aboutRevealDone) return;
+    aboutRevealDone = true;
+    aboutDoneWaiters.splice(0).forEach((run) => run());
+  }
+
+  const ABOUT_MODE = 'once'; // <-- 'none', 'once' or 'scrub'; independent of REVEAL_MODE
 
   function initAbout() {
+    // 'none': the paragraph is simply there. Returning before anything is set
+    // is what makes that true — no SplitText, so the text stays one plain node,
+    // and no hidden states on the portrait, the cat or the wave, which is why
+    // they need no reset. The wave draws itself from the markup: its
+    // stroke-dasharray only ever existed as an inline style put there by the
+    // reveal.
+    if (ABOUT_MODE === 'none') {
+      markAboutDone();
+      return;
+    }
+
     const el = document.querySelector('.about__text');
-    if (!el) return;
+    if (!el) {
+      markAboutDone();
+      return;
+    }
 
     const aboutScrub = ABOUT_MODE === 'scrub';
 
@@ -266,6 +298,7 @@
         y: 40,
         duration: 0.9,
         ease: playEase('power3.out', ABOUT_MODE),
+        onComplete: markAboutDone,
         scrollTrigger: hasScrollTrigger
           ? revealTrigger('.about', 'top 85%', 'center 55%', ABOUT_MODE)
           : undefined,
@@ -275,7 +308,7 @@
 
     // Drives both the character cadence and, through it, when each piece of
     // inline media arrives — raise it and the whole paragraph slows together.
-    // Playing once, the whole paragraph is ~3s at 0.016; the scrubbed value
+    // Playing once, the whole paragraph is ~3.8s at 0.016; the scrubbed value
     // has to be bigger to spread over the section's scroll range.
     const CHAR_STAGGER = aboutScrub ? 0.024 : 0.016;
     const CHAR_FADE = aboutScrub ? 0.8 : 0.5;
@@ -303,6 +336,9 @@
         // pure opacity, which is what keeps it smooth.
         const tl = gsap.timeline({
           scrollTrigger: revealTrigger(el, 'top 85%', 'bottom 45%', ABOUT_MODE),
+          // Fires in both modes — a scrubbed timeline still completes, it just
+          // takes a scroll to get there.
+          onComplete: markAboutDone,
         });
 
         // Characters and inline media are walked in document order (which is
@@ -742,7 +778,10 @@
       mark.textContent = name;
       section.insertBefore(mark, section.firstChild);
 
-      if (hasScrollTrigger && !reduceMotion) revealMark(mark);
+      // SHOWCASE is the one mark that queues behind something else.
+      if (hasScrollTrigger && !reduceMotion) {
+        revealMark(mark, selector === '#showcase' ? whenAboutDone : null);
+      }
     });
   }
 
@@ -756,14 +795,25 @@
   // `once`, not scrub, even though the sections around it scrub: a label that
   // fades back out when you scroll up is a label you can't trust. It is the
   // one thing on screen whose whole job is to still be there.
-  function revealMark(mark) {
+  function revealMark(mark, gate) {
     gsap.set(mark, { autoAlpha: 0, y: 12 });
-    gsap.to(mark, {
+
+    const play = () => gsap.to(mark, {
       autoAlpha: 1,
       y: 0,
       duration: 0.5,
       ease: 'power3.out',
-      scrollTrigger: { trigger: mark, start: 'top 95%', once: true },
+    });
+
+    // The trigger says "you are on screen"; the gate says "the thing you follow
+    // has finished". Both have to be true, in either order — scroll fast enough
+    // and the mark is in view long before the paragraph is done, so the tween
+    // is held rather than skipped.
+    ScrollTrigger.create({
+      trigger: mark,
+      start: 'top 95%',
+      once: true,
+      onEnter: () => (gate ? gate(play) : play()),
     });
   }
 
@@ -969,16 +1019,19 @@
       scrollTrigger: { trigger: '.contact', start: 'top 75%', once: true },
     });
 
-    // Deliberately long and heavily overlapped: at 0.28 apart against a 1.9s
-    // sweep, line 4 starts while line 1 is barely half-revealed, so the section
-    // reads as one continuous wash instead of four separate events firing.
-    const STEP = 0.28;
+    // Overlapped rather than sequential: at 0.18 apart against a 1.1s sweep,
+    // line 4 starts while line 1 is barely half-revealed, so the section reads
+    // as one continuous wash instead of four separate events firing. The whole
+    // thing lands in ~1.6s — the earlier 1.9s/0.28 pairing read as one wash
+    // too, but you waited nearly three seconds for the form.
+    const SWEEP = 1.1;
+    const STEP = 0.18;
 
     lines.forEach((el, i) => {
       const proxy = { p: 0 };
       tl.to(proxy, {
         p: 1,
-        duration: 1.9,
+        duration: SWEEP,
         // power1, not power3 — a hard-decelerating ease spends most of the tween
         // creeping, which is exactly when a mask edge looks like it's ratcheting.
         ease: 'power1.inOut',
@@ -991,13 +1044,13 @@
       // finish at different times and read as two separate moves.
       tl.fromTo(el,
         { y: 8 },
-        { y: 0, duration: 1.9, ease: 'power2.out' },
+        { y: 0, duration: SWEEP, ease: 'power2.out' },
         i * STEP);
     });
 
     if (buttons) {
-      tl.from(buttons, { autoAlpha: 0, y: 12, duration: 0.9, ease: 'power2.out' },
-        (lines.length - 1) * STEP + 0.8);
+      tl.from(buttons, { autoAlpha: 0, y: 12, duration: 0.6, ease: 'power2.out' },
+        (lines.length - 1) * STEP + 0.45);
     }
   }
 

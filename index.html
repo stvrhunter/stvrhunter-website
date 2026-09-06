@@ -34,7 +34,7 @@
     </script>
 
     <!-- Styles -->
-    <link rel="stylesheet" href="styles.css?v=gsap-38">
+    <link rel="stylesheet" href="styles.css?v=gsap-55">
 </head>
 <body>
     <!-- Fixed Navigation -->
@@ -335,6 +335,13 @@
 
         <!-- Contact Section -->
         <section id="contact" class="contact">
+            <!-- Chainmail cat, bottom-right. An h264 loop rather than the
+                 2.2MB GIF it started as (127KB, same 27 frames). It has a white
+                 background rather than an alpha channel, so it is knocked out
+                 with mix-blend-mode — see .contact__cat. -->
+            <video class="contact__cat" src="assets/cat-knight.mp4"
+                   autoplay muted loop playsinline aria-hidden="true"></video>
+
             <div class="contact__container">
                 <form class="contact__form" id="contact-form" action="https://formspree.io/f/mkowykeb" method="POST">
                     <!-- Step 1: Name & Email -->
@@ -415,15 +422,15 @@
     </div>
 
     <!-- Main JavaScript -->
-    <script src="script.js?v=gsap-38"></script>
+    <script src="script.js?v=gsap-55"></script>
 
     <!-- GSAP animations (classic; relies on global gsap/ScrollTrigger above) -->
-    <script src="js/animations.js?v=gsap-38"></script>
+    <script src="js/animations.js?v=gsap-55"></script>
 
     <!-- Three.js scene (ES module; resolves `three` via the import map above) -->
-    <script type="module" src="js/three-scene.js?v=gsap-38"></script>
+    <script type="module" src="js/three-scene.js?v=gsap-55"></script>
 
     <!-- Fly-through clouds background (ES module; resolves `three` via the import map) -->
-    <script type="module" src="js/clouds.js?v=gsap-38"></script>
+    <script type="module" src="js/clouds.js?v=gsap-55"></script>
 </body>
 </html>

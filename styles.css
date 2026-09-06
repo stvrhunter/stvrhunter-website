@@ -305,7 +305,9 @@ body.labels-static .section-label {
     font-weight: var(--weight-medium);
     text-transform: uppercase;
     color: var(--color-text-light);
-    margin-bottom: var(--space-6);
+    /* Close to the thing it names — a mark with 32px under it read as its own
+       block rather than as a label on the section below. */
+    margin-bottom: var(--space-4);
 }
 
 /* The colon is punctuation, not part of the name — it stays out of the label
@@ -318,7 +320,7 @@ body.labels-static .section-label {
    so the mark has to bring its own gutter and its own air. */
 #work > .section-mark {
     padding: var(--space-9) var(--gutter) 0;
-    margin-bottom: var(--space-5);
+    margin-bottom: var(--space-4);
 }
 
 /* Display mode: same mark, set as a chapter break. Beats .monospace on
@@ -1340,10 +1342,19 @@ body.labels-display #work > .section-mark {
    Contact Form
    -------------------------------------------------------------------------- */
 .contact {
+    /* dvh as well as vh: on mobile 100vh is the address-bar-hidden height, so
+       the section was taller than the screen actually showing it and the NEXT
+       button sat just under the fold. */
     min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
-    padding: 80px var(--gutter) var(--space-8);
+    /* Top padding clears the fixed header — the section aligns to the viewport
+       top when you jump to it from the nav, and anything less left the mark and
+       the first line behind the opaque header bar. The header is two lines of
+       brand plus its own padding: ~146px on desktop, ~81px on mobile (see the
+       768 block below). */
+    padding: 162px var(--gutter) var(--space-6);
     background-color: var(--color-background);
     position: relative;
 }
@@ -1353,6 +1364,42 @@ body.labels-display #work > .section-mark {
     flex: 1;
     display: flex;
     flex-direction: column;
+}
+
+/* Sits in the corner the form leaves empty. Absolute, so it can never add to
+   the section's height — the form is the thing that has to fit the viewport.
+
+   darken, not the multiply the footer signature uses, to knock out the white
+   background: the source's "white" is #FCFCFF rather than pure white, and
+   multiply left it three levels darker than the cream — a faint rectangle
+   around the cat. darken takes the per-channel minimum, so every pixel lighter
+   than the cream lands on exactly the cream, whatever shade of near-white it
+   started as. h264 compression only widens that spread, which is another
+   reason not to rely on an exact background value. */
+.contact__cat {
+    display: block;
+    position: absolute;
+    right: var(--gutter);
+    bottom: var(--space-6);
+    /* Sized by whichever runs out first, the width or the height. Width alone
+       meant that on a short window the cat kept its 18vw and climbed out of the
+       empty corner into the form — at 769x640 its top was 1px under the email
+       field. 20dvh keeps it in the space the form actually leaves. */
+    width: auto;
+    height: min(clamp(140px, 18vw, 260px), 20dvh);
+    mix-blend-mode: darken;
+    pointer-events: none;
+    z-index: 1;
+}
+
+@media (max-width: 768px) {
+    .contact__cat {
+        height: min(clamp(110px, 34vw, 170px), 20dvh);
+        /* The buttons go full-width and sit at the bottom here, which is the
+           corner the cat occupies on desktop. Lifted clear of it: section
+           padding + the button row + a gap. */
+        bottom: calc(var(--space-6) + 72px + var(--space-4));
+    }
 }
 
 .contact__form {
@@ -1373,13 +1420,19 @@ body.labels-display #work > .section-mark {
 }
 
 .contact__field {
-    margin-bottom: var(--space-6);
+    margin-bottom: var(--space-5);
 }
+
 
 .contact__label {
     display: block;
     font-family: var(--font-display);
-    font-size: var(--text-display);
+    /* The form is the one block that has to fit a screen rather than fill a
+       column, so its type is capped by viewport HEIGHT as well as width. Same
+       --text-display step as everywhere else — min() only stops it overflowing
+       on a short, wide window, where a width-driven clamp knows nothing about
+       the 700px it actually has to live in. */
+    font-size: min(var(--text-display), 8vh);
     font-weight: var(--weight-bold);
     line-height: 1.1;
     letter-spacing: -0.02em;
@@ -1395,7 +1448,7 @@ body.labels-display #work > .section-mark {
     border: none;
     outline: none;
     font-family: var(--font-display);
-    font-size: var(--text-display);
+    font-size: min(var(--text-display), 8vh);   /* capped by height, see .contact__label */
     font-weight: var(--weight-semibold);
     line-height: 1.1;
     letter-spacing: -0.02em;
@@ -1522,8 +1575,15 @@ body.labels-display #work > .section-mark {
 /* Contact Form - Mobile */
 @media (max-width: 768px) {
     .contact {
-        padding: var(--space-6) var(--gutter);
-        min-height: calc(100vh - 200px);
+        /* Smaller brand here, so a shorter header to clear than the 162px
+           desktop uses. */
+        padding: 96px var(--gutter) var(--space-6);
+        /* Was calc(100vh - 200px), which made the section shorter than the
+           screen and let the footer creep up under the form. A full viewport,
+           in dvh so the mobile address bar can't push the button under the
+           fold. */
+        min-height: 100vh;
+        min-height: 100dvh;
     }
 
     .contact__field {
