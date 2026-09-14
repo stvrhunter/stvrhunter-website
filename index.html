@@ -34,7 +34,7 @@
     </script>
 
     <!-- Styles -->
-    <link rel="stylesheet" href="styles.css?v=gsap-55">
+    <link rel="stylesheet" href="styles.css?v=gsap-56">
 </head>
 <body>
     <!-- Fixed Navigation -->
@@ -132,11 +132,19 @@
              ------------------------------------------------------------------
              No heading, no numbering, no captions: just the work.
 
-             Three layers per card, one transform each, so nothing fights over
+             Four layers per card, one transform each, so nothing fights over
              the element's matrix:
                .showcase__card   data-speed parallax → y  (ScrollSmoother)
-                 .showcase__frame reveal                 → clip, scale, blur
-                   .showcase__art   real media goes here
+                 .showcase__depth  depth             → translateZ (CSS only)
+                   .showcase__frame reveal           → clip, scale, blur
+                     .showcase__art   real media goes here
+
+             The depth layer is what sets a card near or far. Each card owns its
+             own perspective, so translateZ scales the frame about that card's
+             centre rather than a shared vanishing point — the grid placement
+             below is untouched, only the apparent size changes. data-speed is
+             keyed to the same tier, so a card that looks further also drifts
+             slower. Tune the whole effect with --showcase-depth in styles.css.
 
              Every card is a plain grey rectangle for now. To drop real work in,
              put an <img> or <video class="showcase__video"> inside its
@@ -144,84 +152,116 @@
              ================================================================== -->
         <section id="showcase" class="showcase">
             <div class="showcase__scatter">
-            <div class="showcase__card showcase__card--1" data-speed="0.94">
-                <div class="showcase__frame">
-                    <div class="showcase__art"></div>
+            <div class="showcase__card showcase__card--1 showcase__card--far-1" data-speed="0.96">
+                <div class="showcase__depth">
+                    <div class="showcase__frame">
+                        <div class="showcase__art"></div>
+                    </div>
                 </div>
             </div>
-            <div class="showcase__card showcase__card--2" data-speed="1.05">
-                <div class="showcase__frame">
-                    <div class="showcase__art"></div>
+            <div class="showcase__card showcase__card--2 showcase__card--near-2" data-speed="1.10">
+                <div class="showcase__depth">
+                    <div class="showcase__frame">
+                        <div class="showcase__art"></div>
+                    </div>
                 </div>
             </div>
-            <div class="showcase__card showcase__card--3" data-speed="0.9">
-                <div class="showcase__frame">
-                    <div class="showcase__art"></div>
+            <div class="showcase__card showcase__card--3 showcase__card--far-2" data-speed="0.91">
+                <div class="showcase__depth">
+                    <div class="showcase__frame">
+                        <div class="showcase__art"></div>
+                    </div>
                 </div>
             </div>
-            <div class="showcase__card showcase__card--4" data-speed="1.08">
-                <div class="showcase__frame">
-                    <div class="showcase__art"></div>
+            <div class="showcase__card showcase__card--4 showcase__card--near-1" data-speed="1.05">
+                <div class="showcase__depth">
+                    <div class="showcase__frame">
+                        <div class="showcase__art"></div>
+                    </div>
                 </div>
             </div>
-            <div class="showcase__card showcase__card--5" data-speed="0.96">
-                <div class="showcase__frame">
-                    <div class="showcase__art"></div>
+            <div class="showcase__card showcase__card--5 showcase__card--far-3" data-speed="0.86">
+                <div class="showcase__depth">
+                    <div class="showcase__frame">
+                        <div class="showcase__art"></div>
+                    </div>
                 </div>
             </div>
-            <div class="showcase__card showcase__card--6" data-speed="1.03">
-                <div class="showcase__frame">
-                    <div class="showcase__art"></div>
+            <div class="showcase__card showcase__card--6 showcase__card--mid" data-speed="1.00">
+                <div class="showcase__depth">
+                    <div class="showcase__frame">
+                        <div class="showcase__art"></div>
+                    </div>
                 </div>
             </div>
-            <div class="showcase__card showcase__card--7" data-speed="0.92">
-                <div class="showcase__frame">
-                    <div class="showcase__art"></div>
+            <div class="showcase__card showcase__card--7 showcase__card--near-2" data-speed="1.10">
+                <div class="showcase__depth">
+                    <div class="showcase__frame">
+                        <div class="showcase__art"></div>
+                    </div>
                 </div>
             </div>
-            <div class="showcase__card showcase__card--8" data-speed="1.07">
-                <div class="showcase__frame">
-                    <div class="showcase__art"></div>
+            <div class="showcase__card showcase__card--8 showcase__card--far-2" data-speed="0.91">
+                <div class="showcase__depth">
+                    <div class="showcase__frame">
+                        <div class="showcase__art"></div>
+                    </div>
                 </div>
             </div>
-            <div class="showcase__card showcase__card--9" data-speed="0.95">
-                <div class="showcase__frame">
-                    <div class="showcase__art"></div>
+            <div class="showcase__card showcase__card--9 showcase__card--near-1" data-speed="1.05">
+                <div class="showcase__depth">
+                    <div class="showcase__frame">
+                        <div class="showcase__art"></div>
+                    </div>
                 </div>
             </div>
-            <div class="showcase__card showcase__card--10" data-speed="1.04">
-                <div class="showcase__frame">
-                    <div class="showcase__art"></div>
+            <div class="showcase__card showcase__card--10 showcase__card--far-1" data-speed="0.96">
+                <div class="showcase__depth">
+                    <div class="showcase__frame">
+                        <div class="showcase__art"></div>
+                    </div>
                 </div>
             </div>
-            <div class="showcase__card showcase__card--11" data-speed="0.91">
-                <div class="showcase__frame">
-                    <div class="showcase__art"></div>
+            <div class="showcase__card showcase__card--11 showcase__card--near-2" data-speed="1.10">
+                <div class="showcase__depth">
+                    <div class="showcase__frame">
+                        <div class="showcase__art"></div>
+                    </div>
                 </div>
             </div>
-            <div class="showcase__card showcase__card--12" data-speed="1.06">
-                <div class="showcase__frame">
-                    <div class="showcase__art"></div>
+            <div class="showcase__card showcase__card--12 showcase__card--far-3" data-speed="0.86">
+                <div class="showcase__depth">
+                    <div class="showcase__frame">
+                        <div class="showcase__art"></div>
+                    </div>
                 </div>
             </div>
-            <div class="showcase__card showcase__card--13" data-speed="0.97">
-                <div class="showcase__frame">
-                    <div class="showcase__art"></div>
+            <div class="showcase__card showcase__card--13 showcase__card--mid" data-speed="1.00">
+                <div class="showcase__depth">
+                    <div class="showcase__frame">
+                        <div class="showcase__art"></div>
+                    </div>
                 </div>
             </div>
-            <div class="showcase__card showcase__card--14" data-speed="1.02">
-                <div class="showcase__frame">
-                    <div class="showcase__art"></div>
+            <div class="showcase__card showcase__card--14 showcase__card--near-1" data-speed="1.05">
+                <div class="showcase__depth">
+                    <div class="showcase__frame">
+                        <div class="showcase__art"></div>
+                    </div>
                 </div>
             </div>
-            <div class="showcase__card showcase__card--15" data-speed="0.93">
-                <div class="showcase__frame">
-                    <div class="showcase__art"></div>
+            <div class="showcase__card showcase__card--15 showcase__card--far-2" data-speed="0.91">
+                <div class="showcase__depth">
+                    <div class="showcase__frame">
+                        <div class="showcase__art"></div>
+                    </div>
                 </div>
             </div>
-            <div class="showcase__card showcase__card--16" data-speed="1.05">
-                <div class="showcase__frame">
-                    <div class="showcase__art"></div>
+            <div class="showcase__card showcase__card--16 showcase__card--far-1" data-speed="0.96">
+                <div class="showcase__depth">
+                    <div class="showcase__frame">
+                        <div class="showcase__art"></div>
+                    </div>
                 </div>
             </div>
             </div>
@@ -488,15 +528,15 @@
     </div>
 
     <!-- Main JavaScript -->
-    <script src="script.js?v=gsap-55"></script>
+    <script src="script.js?v=gsap-56"></script>
 
     <!-- GSAP animations (classic; relies on global gsap/ScrollTrigger above) -->
-    <script src="js/animations.js?v=gsap-55"></script>
+    <script src="js/animations.js?v=gsap-56"></script>
 
     <!-- Three.js scene (ES module; resolves `three` via the import map above) -->
-    <script type="module" src="js/three-scene.js?v=gsap-55"></script>
+    <script type="module" src="js/three-scene.js?v=gsap-56"></script>
 
     <!-- Fly-through clouds background (ES module; resolves `three` via the import map) -->
-    <script type="module" src="js/clouds.js?v=gsap-55"></script>
+    <script type="module" src="js/clouds.js?v=gsap-56"></script>
 </body>
 </html>

@@ -679,6 +679,64 @@ body.labels-display #work > .section-mark {
 .showcase__card {
     align-self: start;   /* so the margin-top offsets actually bite */
     min-width: 0;
+
+    /* Depth lives here rather than on .showcase__scatter on purpose. A shared
+       perspective puts one vanishing point in the middle of the grid, so a
+       pushed-back card slides toward that point and the scatter drifts out of
+       place. Per-card perspective puts the vanishing point at each card's own
+       centre instead: translateZ then only changes the card's apparent size,
+       and every grid_column / margin-top below still lands where it did.
+
+       `perspective` is safe on this element even though ScrollSmoother writes
+       to it every frame — the plugin owns `transform`, and this is not it. */
+    perspective: var(--showcase-perspective, 1400px);
+}
+
+/* --------------------------------------------------------------------------
+   Card depth
+   --------------------------------------------------------------------------
+   Six tiers, from --z: -260px (furthest) to 130px (nearest). Apparent scale is
+   perspective / (perspective - z), so at the 1400px default the range runs
+   roughly 0.84x to 1.10x.
+
+   --showcase-depth is the one knob: 0 flattens the section back to a plain
+   grid, 1 is as authored, 1.5 exaggerates. Nothing else needs touching.
+   -------------------------------------------------------------------------- */
+.showcase__depth {
+    transform: translateZ(calc(var(--z, 0px) * var(--showcase-depth, 1)));
+
+    /* Atmospheric haze — distance reads as much through softness as through
+       size, and without it the far cards just look small. Set per tier below;
+       this is the near/default case. */
+    filter: blur(0px);
+    opacity: 1;
+}
+
+/* Far cards. The blur is on this layer, not .showcase__frame — the reveal in
+   js/animations.js animates that element's filter down to blur(0px) and would
+   wipe a static value out. */
+.showcase__card--far-3  .showcase__depth { --z: -260px; filter: blur(1.6px); opacity: 0.72; }
+.showcase__card--far-2  .showcase__depth { --z: -170px; filter: blur(1px);   opacity: 0.82; }
+.showcase__card--far-1  .showcase__depth { --z:  -80px; filter: blur(0.4px); opacity: 0.92; }
+.showcase__card--mid    .showcase__depth { --z:    0px; }
+.showcase__card--near-1 .showcase__depth { --z:   70px; }
+.showcase__card--near-2 .showcase__depth { --z:  130px; }
+
+/* A near card is scaled past its grid cell, so it can cross the gap into its
+   neighbours. That overlap is the point — it is the occlusion cue that sells
+   the depth — but it only reads correctly if the nearer card paints on top. */
+.showcase__card--far-3  { z-index: 1; }
+.showcase__card--far-2  { z-index: 2; }
+.showcase__card--far-1  { z-index: 3; }
+.showcase__card--mid    { z-index: 4; }
+.showcase__card--near-1 { z-index: 5; }
+.showcase__card--near-2 { z-index: 6; }
+
+/* The outermost columns scale past the container padding at the near tiers.
+   overflow-x: clip rather than hidden — hidden on one axis forces the other to
+   scroll, which would trap the page inside this section. */
+.showcase {
+    overflow-x: clip;
 }
 
 /* Columns, hang depth and proportion — the scatter itself.
@@ -761,6 +819,10 @@ body.labels-display #work > .section-mark {
     .showcase__card:nth-child(3n + 1) { grid-column: 1 / span 2; margin-top: 0;   }
     .showcase__card:nth-child(3n + 2) { grid-column: 3 / span 2; margin-top: 5vh; }
     .showcase__card:nth-child(3n)     { grid-column: 5 / span 2; margin-top: 2vh; }
+
+    /* Half depth. The cards are narrower here, so an unchanged translateZ eats
+       a far bigger share of the gap and the near tiers start colliding. */
+    .showcase__scatter { --showcase-depth: 0.5; }
 }
 
 /* Showcase — mobile: two columns, no hangs (the offsets read as dead space at
@@ -780,6 +842,15 @@ body.labels-display #work > .section-mark {
 
     .showcase__card {
         margin-top: 0 !important;
+    }
+
+    /* Flat. Two columns with no hangs leaves nothing to scale into, and the
+       far tiers' blur just reads as a rendering fault at this size. */
+    .showcase__scatter { --showcase-depth: 0; }
+
+    .showcase__scatter .showcase__depth {
+        filter: none;
+        opacity: 1;
     }
 }
 
