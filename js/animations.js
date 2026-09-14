@@ -1092,6 +1092,39 @@
      interrupt the tween instead of wrestling it.
      ---------------------------------------------------------------------- */
 
+  // Optical left alignment for the big work headings. CSS lines up the text
+  // BOX; the first glyph's left side bearing then pushes the ink right of it.
+  // At 72px a 'B' carries ~5.4px of that air against ~1.5px on the 20px
+  // description below, so the boxes agree while the left edge reads ragged.
+  // Canvas is the only place the browser exposes the bearing, so measure the
+  // first character and pull the heading back by exactly it — InDesign's
+  // optical margin alignment, by hand.
+  //
+  // Stored in em rather than px: the size is a clamp(), so an em value stays
+  // correct through every resize without a listener. Runs outside the
+  // matchMedia blocks because this is layout, not motion — reduced motion
+  // needs it too.
+  function alignHeadingsOptically() {
+    const headings = document.querySelectorAll('.work__heading');
+    if (!headings.length) return;
+    const ctx = document.createElement('canvas').getContext('2d');
+    if (!ctx) return;
+
+    headings.forEach((heading) => {
+      const text = heading.textContent.trim();
+      if (!text) return;
+      const cs = getComputedStyle(heading);
+      const size = parseFloat(cs.fontSize);
+      if (!size) return;
+
+      ctx.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+      const bearing = -ctx.measureText(text[0]).actualBoundingBoxLeft;
+      if (!isFinite(bearing) || bearing <= 0) return;
+
+      heading.style.marginLeft = `${(-bearing / size).toFixed(4)}em`;
+    });
+  }
+
   function initSmoothNav(duration) {
     document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
       anchor.addEventListener('click', function (e) {
@@ -1194,6 +1227,9 @@
     initWorkStack();
   });
 
+
+  // Must wait for Archivo: measuring the fallback font gives the wrong bearing.
+  fontsReady.then(alignHeadingsOptically);
 
   initSmoothNav(reduceMotion ? 0 : 1.1);
 
