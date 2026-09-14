@@ -750,7 +750,7 @@
     ['#sup', 'SUP'],
     ['#about', 'ABOUT'],
     ['#showcase', 'SHOWCASE'],
-    ['#work', 'PROJECTS'],
+    ['#work', 'EXPERIENCES'],
     ['#contact', 'CONTACT'],
   ];
 
